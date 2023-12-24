@@ -1,0 +1,11 @@
+[package]
+name = "three-rs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = {version = "1.0.193", default-features = false, features = ["derive"]}
+gltf = {version = "1.4.0", features = ["import"]}
