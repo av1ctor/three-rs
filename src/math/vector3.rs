@@ -42,6 +42,12 @@ impl Vector3 {
         }
     }
 
+    pub fn to_slice(
+        &self
+    ) -> [f32; 3] {
+        [self.x, self.y, self.z]
+    }
+
     pub fn zero(
     ) -> Self {
         Self {
@@ -143,6 +149,12 @@ impl Vector3 {
 		    z: self.x * other.y - self.y * other.x,
         }
     }
+
+    pub fn length_sq(
+        &self
+    ) -> f32 {
+		self.x * self.x + self.y * self.y + self.z * self.z
+	}
 
     pub fn length(
         &self

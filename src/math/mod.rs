@@ -6,5 +6,6 @@ pub mod box3;
 pub mod capsule;
 pub mod plane;
 pub mod matrix4;
+pub mod path3;
 pub mod octree;
 pub mod misc;
