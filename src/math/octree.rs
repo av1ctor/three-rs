@@ -76,13 +76,9 @@ impl Octree {
                             }
 
                             for tri in triangles {
-                                let mut a = Vector3::from_slice(&tri[0]);
-                                let mut b = Vector3::from_slice(&tri[1]);
-                                let mut c = Vector3::from_slice(&tri[2]);
-
-                                a.apply_matrix4(world_matrix);
-                                b.apply_matrix4(world_matrix);
-                                c.apply_matrix4(world_matrix);
+                                let a = Vector3::from_slice(&tri[0]).apply_matrix4(world_matrix);
+                                let b = Vector3::from_slice(&tri[1]).apply_matrix4(world_matrix);
+                                let c = Vector3::from_slice(&tri[2]).apply_matrix4(world_matrix);
 
                                 octree.add_triangle(Triangle::new(a, b, c));
                             }
