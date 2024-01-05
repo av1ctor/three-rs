@@ -9,3 +9,4 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde = {version = "1.0.193", default-features = false, features = ["derive"]}
 gltf = {version = "1.4.0", features = ["import"]}
+ulid = {version = "1.0.0", features = [], default-features = false}
