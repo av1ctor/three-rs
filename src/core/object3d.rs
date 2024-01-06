@@ -1,8 +1,4 @@
-use crate::math::{vector3::Vector3, euler::Euler, quaternion::Quaternion, matrix4::Matrix4, matrix3::Matrix3};
-
-const X_AXIS: Vector3 = Vector3{x: 1.0, y: 0.0, z: 0.0};
-const Y_AXIS: Vector3 = Vector3{x: 0.0, y: 1.0, z: 0.0};
-const Z_AXIS: Vector3 = Vector3{x: 0.0, y: 0.0, z: 1.0};
+use crate::math::{vector3::Vector3, euler::Euler, quaternion::{Quaternion, X_AXIS, Y_AXIS, Z_AXIS}, matrix4::Matrix4, matrix3::Matrix3};
 
 pub struct Object3d<'a> {
     pub id: usize,
@@ -85,7 +81,7 @@ impl<'a> Object3d<'_> {
         &mut self,
         euler: &Euler
     ) {
-        self.quaternion = Quaternion::from_euler(euler);
+        self.quaternion = Quaternion::from_vector(&euler.v, euler.order);
         self.on_quaternion_updated();
     }
 
@@ -110,7 +106,7 @@ impl<'a> Object3d<'_> {
         axis: &Vector3,
         angle: f32
     ) {
-        self.quaternion = self.quaternion.mul(&Quaternion::from_axis_and_angle(axis, angle));
+        self.quaternion = self.quaternion.rotate_on_axis(axis, angle);
         self.on_quaternion_updated();
     }
 

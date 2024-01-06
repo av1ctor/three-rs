@@ -1,6 +1,10 @@
 use serde::{Serialize, Deserialize};
 
-use super::{euler::{Euler, EulerOrder}, vector3::Vector3, matrix3::Matrix3};
+use super::{euler::{EulerOrder, Euler}, vector3::Vector3, matrix3::Matrix3};
+
+pub const X_AXIS: Vector3 = Vector3{x: 1.0, y: 0.0, z: 0.0};
+pub const Y_AXIS: Vector3 = Vector3{x: 0.0, y: 1.0, z: 0.0};
+pub const Z_AXIS: Vector3 = Vector3{x: 0.0, y: 0.0, z: 1.0};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Quaternion {
@@ -55,18 +59,19 @@ impl Quaternion {
         }
     }
 
-    pub fn from_euler(
-        euler: &Euler
+    pub fn from_vector(
+        vector: &Vector3,
+        order: EulerOrder
     ) -> Self {
-		let c1 = (euler.v.x / 2.0).cos();
-		let c2 = (euler.v.y / 2.0).cos();
-		let c3 = (euler.v.z / 2.0).cos();
+		let c1 = (vector.x / 2.0).cos();
+		let c2 = (vector.y / 2.0).cos();
+		let c3 = (vector.z / 2.0).cos();
 
-		let s1 = (euler.v.x / 2.0).sin();
-		let s2 = (euler.v.y / 2.0).sin();
-		let s3 = (euler.v.z / 2.0).sin();
+		let s1 = (vector.x / 2.0).sin();
+		let s2 = (vector.y / 2.0).sin();
+		let s3 = (vector.z / 2.0).sin();
 
-		match euler.order {
+		match order {
 			EulerOrder::XYZ => {
 				Self {
                     x: s1 * c2 * c3 + c1 * s2 * s3,
@@ -76,6 +81,12 @@ impl Quaternion {
                 }
             }
         }
+    }
+
+    pub fn from_euler(
+        euler: &Euler
+    ) -> Self {
+        Self::from_vector(&euler.v, euler.order)
     }
 
     pub fn from_matrix(
@@ -99,40 +110,40 @@ impl Quaternion {
 			let s = 0.5 / (trace + 1.0).sqrt();
 
 			Self {
-                w: 0.25 / s,
                 x: (m32 - m23) * s,
                 y: (m13 - m31) * s,
                 z: (m21 - m12) * s,
+                w: 0.25 / s,
             }
 		}
         else if m11 > m22 && m11 > m33 {
 			let s = 2.0 * (1.0 + m11 - m22 - m33).sqrt();
 
 			Self {
-                w: (m32 - m23) / s,
                 x: 0.25 * s,
                 y: (m12 + m21) / s,
                 z: (m13 + m31) / s,
+                w: (m32 - m23) / s,
             }
 		} 
         else if m22 > m33 {
 			let s = 2.0 * (1.0 + m22 - m11 - m33).sqrt();
 
 			Self {
-                w: (m13 - m31) / s,
                 x: (m12 + m21) / s,
                 y: 0.25 * s,
                 z: (m23 + m32) / s,
+                w: (m13 - m31) / s,
             }
 		} 
         else {
 			let s = 2.0 * (1.0 + m33 - m11 - m22).sqrt();
 
 			Self {
-                w: (m21 - m12) / s,
                 x: (m13 + m31) / s,
                 y: (m23 + m32) / s,
                 z: 0.25 * s,
+                w: (m21 - m12) / s,
             }
 		}
     }
@@ -244,6 +255,35 @@ impl Quaternion {
             z: self.z * -1.0,
             w: self.w,
         }
+    }
+
+    pub fn rotate_on_axis(
+        &self,
+        axis: &Vector3,
+        angle: f32
+    ) -> Self {
+        self.mul(&Quaternion::from_axis_and_angle(axis, angle))
+    }
+
+    pub fn rotate_x(
+        &self,
+        angle: f32
+    ) -> Self {
+        self.rotate_on_axis(&X_AXIS, angle)
+    }
+
+    pub fn rotate_y(
+        &self,
+        angle: f32
+    ) -> Self {
+        self.rotate_on_axis(&Y_AXIS, angle)
+    }
+
+    pub fn rotate_z(
+        &self,
+        angle: f32
+    ) -> Self {
+        self.rotate_on_axis(&Z_AXIS, angle)
     }
 
     pub fn angle(

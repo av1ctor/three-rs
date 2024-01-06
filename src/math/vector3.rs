@@ -1,5 +1,7 @@
+use std::f32::consts::PI;
+
 use serde::{Serialize, Deserialize};
-use super::{matrix4::Matrix4, quaternion::Quaternion};
+use super::{matrix4::Matrix4, quaternion::Quaternion, euler::Euler};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Vector3 {
@@ -49,6 +51,16 @@ impl Vector3 {
         }
     }
 
+    pub fn from_euler(
+        euler: &Euler
+    ) -> Self {
+        Self {
+            x: euler.v.x,
+            y: euler.v.y,
+            z: euler.v.z,
+        }
+    }
+
     pub fn to_slice(
         &self
     ) -> [f32; 3] {
@@ -70,6 +82,15 @@ impl Vector3 {
             x: 1.0,
             y: 1.0,
             z: 1.0,
+        }
+    }
+
+    pub fn right(
+    ) -> Self {
+        Self {
+            x: 1.0,
+            y: 0.0,
+            z: 0.0,
         }
     }
 
@@ -155,6 +176,16 @@ impl Vector3 {
         self.mul_scalar(1.0 / scalar)
     }
 
+    pub fn neg(
+        &self
+    ) -> Self {
+        Self {
+            x: -self.x, 
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+
     pub fn dot( 
         &self,
         other: &Self
@@ -194,20 +225,70 @@ impl Vector3 {
         self.div_scalar(if len != 0.0 {len} else {1.0})
 	}
 
+    pub fn hypot2(
+        &self,
+        other: &Self
+    ) -> f32 {
+        let s = self.sub(other);
+        s.dot(&s)
+    }
+
+    pub fn project(
+        &self,
+        other: &Self
+    ) -> Self {
+        let d = other.length_sq();
+		if d == 0.0 {
+            return Vector3::zero()
+        };
+
+		let k = other.dot(&self) / d;
+        
+        other.mul_scalar(k)
+    }
+
+    pub fn project_on_plane(
+        &self,
+        plane_normal: &Self
+    ) -> Self {
+        self.sub(&self.project(plane_normal))
+    }
+
+    pub fn reflect(
+        &self,
+        normal: &Self
+    ) -> Self {
+        self.sub(&normal.mul_scalar(2.0 * self.dot(normal)))
+    }
+    
+    pub fn angle_to(
+        &self,
+        other: &Self
+    ) -> f32 {
+        let d = (self.length_sq() * other.length_sq()).sqrt();
+		if d == 0.0 {
+            return PI / 2.0;
+        };
+
+		let theta = self.dot(other) / d;
+
+		f32::acos(theta.clamp(-1.0, 1.0))
+    }
+    
     pub fn distance_to(
         &self,
-        v: &Vector3
+        other: &Vector3
     ) -> f32 {
-		f32::sqrt(self.distance_to_sq(v))
+		f32::sqrt(self.distance_to_sq(other))
 	}
 
 	pub fn distance_to_sq(
         &self,
-        v: &Vector3
+        other: &Vector3
     ) -> f32 {
-		let dx = self.x - v.x;
-        let dy = self.y - v.y;
-        let dz = self.z - v.z;
+		let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        let dz = self.z - other.z;
 		dx * dx + dy * dy + dz * dz
 	}
 
@@ -246,12 +327,10 @@ impl Vector3 {
         &self,
         q: &Quaternion
     ) -> Self {
-		// t = 2 * cross( q.xyz, v );
 		let tx = 2.0 * (q.y * self.z - q.z * self.y);
 		let ty = 2.0 * (q.z * self.x - q.x * self.z);
 		let tz = 2.0 * (q.x * self.y - q.y * self.x);
 
-		// v + q.w * t + cross( q.xyz, t );
         Self {
             x: self.x + q.w * tx + q.y * tz - q.z * ty,
 		    y: self.y + q.w * ty + q.z * tx - q.x * tz,
