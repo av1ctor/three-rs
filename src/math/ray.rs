@@ -1,6 +1,5 @@
 use super::{vector3::Vector3, box3::Box3, triangle::Triangle};
 
-
 #[derive(Clone, Copy, Debug)]
 pub struct Ray {
     pub origin: Vector3,

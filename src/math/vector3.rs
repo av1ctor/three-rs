@@ -1,5 +1,4 @@
 use std::f32::consts::PI;
-
 use serde::{Serialize, Deserialize};
 use super::{matrix4::Matrix4, quaternion::Quaternion, euler::Euler};
 

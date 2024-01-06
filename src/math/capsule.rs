@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
-use super::{vector3::Vector3, box3::Box3, triangle::Triangle, line3::Line3, misc::line_to_line_closest_points};
+use super::{
+    vector3::Vector3, 
+    box3::Box3, 
+    triangle::Triangle, 
+    line3::Line3, 
+    misc::line_to_line_closest_points
+};
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct Capsule {

@@ -1,6 +1,13 @@
 use std::collections::HashSet;
 use serde::{Serialize, Deserialize};
-use super::{triangle::Triangle, box3::Box3, vector3::Vector3, matrix4::Matrix4, ray::Ray, capsule::Capsule};
+use super::{
+    triangle::Triangle, 
+    box3::Box3, 
+    vector3::Vector3, 
+    matrix4::Matrix4, 
+    ray::Ray, 
+    capsule::Capsule
+};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct OctreeNode {
@@ -261,17 +268,6 @@ impl OctreeNode {
         }
     }
 
-    fn _traverse(
-        tree: &Self,
-        level: usize,
-        cb: &mut dyn FnMut(&Self, usize) -> ()
-    ) {
-        cb(tree, level);
-        for sub in &tree.sub_trees {
-            Self::_traverse(sub, level + 1, cb);
-        }
-    }
-
     pub fn build(
         &mut self,
         bx: Box3,
@@ -279,20 +275,6 @@ impl OctreeNode {
     ) {
         self.bx = bx;
         self.split(0, triangles_buffer);
-
-        /*let mut trees = 0;
-        let mut triangles = 0;
-        Self::_traverse(
-            &self, 
-            0,
-            &mut |tree, _level| -> () {
-                trees += 1;
-                triangles += tree.triangles.len();
-            }
-        );
-
-        println!("trees: {}", trees);
-        println!("triangles: {}", triangles);*/
 	}
 
     pub fn get_ray_triangles(

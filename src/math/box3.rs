@@ -30,7 +30,9 @@ impl Box3 {
     pub fn is_empty(
         &self
     ) -> bool {
-		(self.max.x < self.min.x) || (self.max.y < self.min.y) || (self.max.z < self.min.z)
+		(self.max.x < self.min.x) || 
+        (self.max.y < self.min.y) || 
+        (self.max.z < self.min.z)
 	}
 
     pub fn get_center( 

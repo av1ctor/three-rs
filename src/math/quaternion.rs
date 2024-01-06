@@ -1,6 +1,9 @@
 use serde::{Serialize, Deserialize};
-
-use super::{euler::{EulerOrder, Euler}, vector3::{Vector3, RIGHT, UP, FORWARD}, matrix3::Matrix3};
+use super::{
+    euler::{EulerOrder, Euler}, 
+    vector3::{Vector3, RIGHT, UP, FORWARD}, 
+    matrix3::Matrix3
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Quaternion {

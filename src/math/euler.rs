@@ -1,6 +1,9 @@
-pub use serde::{Serialize, Deserialize};
-
-use super::{vector3::Vector3, matrix4::Matrix4, quaternion::Quaternion};
+use serde::{Serialize, Deserialize};
+use super::{
+    vector3::Vector3, 
+    matrix4::Matrix4, 
+    quaternion::Quaternion
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum EulerOrder {
@@ -46,11 +49,11 @@ impl Euler {
         }
     }
 
-    pub fn from_quartenion(
+    pub fn from_quaternion(
         q: &Quaternion,
         order: EulerOrder
     ) -> Self {
-        let m = Matrix4::from_quartenion(q);
+        let m = Matrix4::from_quaternion(q);
         Self::from_rotation_matrix(&m, order)
     }
 

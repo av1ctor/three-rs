@@ -1,4 +1,8 @@
-use super::{vector3::Vector3, quaternion::Quaternion, matrix3::Matrix3};
+use super::{
+    vector3::Vector3, 
+    quaternion::Quaternion, 
+    matrix3::Matrix3
+};
 
 const ZERO: Vector3 = Vector3{x: 0.0, y: 0.0, z: 0.0};
 const ONE: Vector3 = Vector3{x: 1.0, y: 1.0, z: 1.0};
@@ -13,7 +17,7 @@ impl Matrix4 {
         Self(src.clone())
     }
 
-    pub fn from_quartenion(
+    pub fn from_quaternion(
         q: &Quaternion
     ) -> Self {
         Self::compose(&ZERO, q, &ONE)

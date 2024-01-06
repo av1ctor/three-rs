@@ -1,4 +1,10 @@
-use crate::math::{vector3::{Vector3, RIGHT, UP, FORWARD}, euler::Euler, quaternion::Quaternion, matrix4::Matrix4, matrix3::Matrix3};
+use crate::math::{
+    vector3::{Vector3, RIGHT, UP, FORWARD}, 
+    euler::Euler, 
+    quaternion::Quaternion, 
+    matrix4::Matrix4, 
+    matrix3::Matrix3
+};
 
 pub struct Object3d<'a> {
     pub id: usize,
@@ -44,7 +50,7 @@ impl<'a> Object3d<'_> {
     fn on_quaternion_updated(
         &mut self
     ) {
-        self.rotation = Euler::from_quartenion(&self.quaternion, self.rotation.order);
+        self.rotation = Euler::from_quaternion(&self.quaternion, self.rotation.order);
     }
 
     fn update_matrix(
