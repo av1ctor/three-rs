@@ -44,6 +44,20 @@ impl Box3 {
         }
 	}
 
+    pub fn intersects_with_box(
+        &self,
+        bx: &Self
+    ) -> bool {
+        if bx.max.x < self.min.x || bx.min.x > self.max.x ||
+			bx.max.y < self.min.y || bx.min.y > self.max.y ||
+			bx.max.z < self.min.z || bx.min.z > self.max.z {
+            false
+        }
+        else {
+            true
+        }
+    }
+
     pub fn intersects_with_triangle(
         &self,
         tri: &Triangle

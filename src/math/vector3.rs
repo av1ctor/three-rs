@@ -3,6 +3,10 @@ use std::f32::consts::PI;
 use serde::{Serialize, Deserialize};
 use super::{matrix4::Matrix4, quaternion::Quaternion, euler::Euler};
 
+pub const RIGHT: Vector3 = Vector3{x: 1.0, y: 0.0, z: 0.0};
+pub const UP: Vector3 = Vector3{x: 0.0, y: 1.0, z: 0.0};
+pub const FORWARD: Vector3 = Vector3{x: 0.0, y: 0.0, z: 1.0};
+
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Vector3 {
     pub x: f32,
@@ -82,15 +86,6 @@ impl Vector3 {
             x: 1.0,
             y: 1.0,
             z: 1.0,
-        }
-    }
-
-    pub fn right(
-    ) -> Self {
-        Self {
-            x: 1.0,
-            y: 0.0,
-            z: 0.0,
         }
     }
 
@@ -336,6 +331,20 @@ impl Vector3 {
 		    y: self.y + q.w * ty + q.z * tx - q.x * tz,
 		    z: self.z + q.w * tz + q.x * ty - q.y * tx,
         }
+    }
+
+    pub fn rotate_by_quaternion(
+        &self,
+        q: &Quaternion
+    ) -> Self {
+        // from https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+        
+        let u = Vector3::new(q.x, q.y, q.z);
+        let s = q.w;
+        
+        u.mul_scalar(2.0 * u.dot(&self))
+            .add(&self.mul_scalar(s*s - u.dot(&u)))
+            .add(&u.cross(&self).mul_scalar(2.0 * s))
     }
 
 }

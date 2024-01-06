@@ -1,4 +1,4 @@
-use crate::math::{vector3::Vector3, euler::Euler, quaternion::{Quaternion, X_AXIS, Y_AXIS, Z_AXIS}, matrix4::Matrix4, matrix3::Matrix3};
+use crate::math::{vector3::{Vector3, RIGHT, UP, FORWARD}, euler::Euler, quaternion::Quaternion, matrix4::Matrix4, matrix3::Matrix3};
 
 pub struct Object3d<'a> {
     pub id: usize,
@@ -114,21 +114,21 @@ impl<'a> Object3d<'_> {
         &mut self,
         angle: f32
     ) {
-        self.rotate_on_axis(&X_AXIS, angle);
+        self.rotate_on_axis(&RIGHT, angle);
     }
 
     pub fn rotate_y(
         &mut self,
         angle: f32
     ) {
-        self.rotate_on_axis(&Y_AXIS, angle);
+        self.rotate_on_axis(&UP, angle);
     }
 
     pub fn rotate_z(
         &mut self,
         angle: f32
     ) {
-        self.rotate_on_axis(&Z_AXIS, angle);
+        self.rotate_on_axis(&FORWARD, angle);
     }
 
     pub fn rotate_on_world_axis(
@@ -152,20 +152,20 @@ impl<'a> Object3d<'_> {
         &mut self,
         distance: f32
     ) {
-        self.translate_on_axis(&X_AXIS, distance);
+        self.translate_on_axis(&RIGHT, distance);
     }
 
     pub fn translate_y(
         &mut self,
         distance: f32
     ) {
-        self.translate_on_axis(&Y_AXIS, distance);
+        self.translate_on_axis(&UP, distance);
     }
 
     pub fn translate_z(
         &mut self,
         distance: f32
     ) {
-        self.translate_on_axis(&Z_AXIS, distance);
+        self.translate_on_axis(&FORWARD, distance);
     }
 }

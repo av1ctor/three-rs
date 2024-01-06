@@ -1,10 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-use super::{euler::{EulerOrder, Euler}, vector3::Vector3, matrix3::Matrix3};
-
-pub const X_AXIS: Vector3 = Vector3{x: 1.0, y: 0.0, z: 0.0};
-pub const Y_AXIS: Vector3 = Vector3{x: 0.0, y: 1.0, z: 0.0};
-pub const Z_AXIS: Vector3 = Vector3{x: 0.0, y: 0.0, z: 1.0};
+use super::{euler::{EulerOrder, Euler}, vector3::{Vector3, RIGHT, UP, FORWARD}, matrix3::Matrix3};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Quaternion {
@@ -269,21 +265,21 @@ impl Quaternion {
         &self,
         angle: f32
     ) -> Self {
-        self.rotate_on_axis(&X_AXIS, angle)
+        self.rotate_on_axis(&RIGHT, angle)
     }
 
     pub fn rotate_y(
         &self,
         angle: f32
     ) -> Self {
-        self.rotate_on_axis(&Y_AXIS, angle)
+        self.rotate_on_axis(&UP, angle)
     }
 
     pub fn rotate_z(
         &self,
         angle: f32
     ) -> Self {
-        self.rotate_on_axis(&Z_AXIS, angle)
+        self.rotate_on_axis(&FORWARD, angle)
     }
 
     pub fn angle(
