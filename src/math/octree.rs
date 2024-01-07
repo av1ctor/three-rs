@@ -26,7 +26,7 @@ impl Octree {
     pub fn from_gltf<'a>(
         scene: gltf::Scene<'_>,
         buffers: Vec<gltf::buffer::Data>
-    ) -> Self {
+    ) -> Result<Self, String> {
         let mut octree = Self {
             root: OctreeNode::new(Box3::default()),
             bounds: Box3::default(),
@@ -79,7 +79,9 @@ impl Octree {
                                         ]);
                                     }
                                 }
-                                _ => panic!("Unsupported mode"),
+                                _ => {
+                                    return Err("Unsupported primitive".to_string());
+                                },
                             }
 
                             for tri in triangles {
@@ -91,13 +93,15 @@ impl Octree {
                             }
                         }
                     }
+
+                    Ok(())
                 }
-            );
+            )?;
         }
 
         octree.build();
 
-        octree
+        Ok(octree)
     }
 
     pub fn add_triangle( 
@@ -331,8 +335,8 @@ impl OctreeNode {
 fn traverse_meshes(
     node: &gltf::Node<'_>,
     world_matrix: Option<&Matrix4>,
-    cb: &mut dyn FnMut (&gltf::Mesh<'_>, &Matrix4)
-) {
+    cb: &mut dyn FnMut (&gltf::Mesh<'_>, &Matrix4) -> Result<(), String>
+) -> Result<(), String> {
     if let Some(mesh) = node.mesh() {
         let matrix = Matrix4::new(&node.transform().matrix());
         let world_matrix = if let Some(m) = world_matrix {
@@ -341,14 +345,16 @@ fn traverse_meshes(
         else {
             matrix
         };
-        cb(&mesh, &world_matrix);
+        cb(&mesh, &world_matrix)?;
         for child in node.children() {
-            traverse_meshes(&child, Some(&world_matrix), cb);
+            traverse_meshes(&child, Some(&world_matrix), cb)?;
         }
     }
     else {
         for child in node.children() {
-            traverse_meshes(&child, world_matrix, cb);
+            traverse_meshes(&child, world_matrix, cb)?;
         }
     }
+
+    Ok(())
 }
