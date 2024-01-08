@@ -338,7 +338,7 @@ fn traverse_meshes(
     cb: &mut dyn FnMut (&gltf::Mesh<'_>, &Matrix4) -> Result<(), String>
 ) -> Result<(), String> {
     if let Some(mesh) = node.mesh() {
-        let matrix = Matrix4::new(&node.transform().matrix());
+        let matrix = Matrix4::from_slice2(&node.transform().matrix());
         let world_matrix = if let Some(m) = world_matrix {
             m.mul(&matrix)
         }
