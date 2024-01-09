@@ -337,14 +337,16 @@ fn traverse_meshes(
     world_matrix: Option<&Matrix4>,
     cb: &mut dyn FnMut (&gltf::Mesh<'_>, &Matrix4) -> Result<(), String>
 ) -> Result<(), String> {
+    
+    let matrix = Matrix4::from_slice2(&node.transform().matrix());
+    let world_matrix = if let Some(m) = world_matrix {
+        m.mul(&matrix)
+    }
+    else {
+        matrix
+    };
+    
     if let Some(mesh) = node.mesh() {
-        let matrix = Matrix4::from_slice2(&node.transform().matrix());
-        let world_matrix = if let Some(m) = world_matrix {
-            m.mul(&matrix)
-        }
-        else {
-            matrix
-        };
         cb(&mesh, &world_matrix)?;
         for child in node.children() {
             traverse_meshes(&child, Some(&world_matrix), cb)?;
@@ -352,7 +354,7 @@ fn traverse_meshes(
     }
     else {
         for child in node.children() {
-            traverse_meshes(&child, world_matrix, cb)?;
+            traverse_meshes(&child, Some(&world_matrix), cb)?;
         }
     }
 
