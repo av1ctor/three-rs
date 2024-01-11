@@ -332,20 +332,6 @@ impl Vector3 {
         }
     }
 
-    pub fn rotate_by_quaternion(
-        &self,
-        q: &Quaternion
-    ) -> Self {
-        // from https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-        
-        let u = Vector3::new(q.x, q.y, q.z);
-        let s = q.w;
-        
-        u.mul_scalar(2.0 * u.dot(&self))
-            .add(&self.mul_scalar(s*s - u.dot(&u)))
-            .add(&u.cross(&self).mul_scalar(2.0 * s))
-    }
-
     pub fn rotate_x(
         &self,
         angle: f32
@@ -388,10 +374,21 @@ impl Vector3 {
         }
     }
 
-    pub fn angle_z(
+    pub fn angle_zx(
         &self
     ) -> f32 {
         let a = self.z.atan2(self.x);
+        if a < 0.0 { 
+            a + 2.0 * PI
+        } else { 
+            a 
+        }
+    }
+
+    pub fn angle_xz(
+        &self
+    ) -> f32 {
+        let a = self.x.atan2(self.z);
         if a < 0.0 { 
             a + 2.0 * PI
         } else { 
