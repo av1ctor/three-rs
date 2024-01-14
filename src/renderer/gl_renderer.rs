@@ -129,9 +129,6 @@ impl GlRenderer {
         let view_loc = gl.get_uniform_location(*program, "view").unwrap();
         let model_loc = gl.get_uniform_location(*program, "model").unwrap();
 
-        let projection = Matrix4::perspective_fov(45.0, (w as f32) / (h as f32), 0.1, 1000.0);
-        gl.uniform_matrix_4_f32_slice(Some(&projection_loc), false, projection.to_slice());
-
         let view = Matrix4::look_at(
             &Vector3::new(0.0, 10.0, 50.0), 
             &Vector3::new(0.0, 0.0, 0.0), 
@@ -143,7 +140,7 @@ impl GlRenderer {
         gl.enable(DEPTH);
         gl.enable(COLOR);
         gl.enable(CULL_FACE);
-        gl.clear_color(0.5, 0.5, 0.5, 1.0);
+        gl.clear_color(0.0, 0.0, 0.0, 1.0);
 
         ShaderUniformLocations {
             projection: projection_loc,

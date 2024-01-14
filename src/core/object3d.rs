@@ -235,6 +235,15 @@ impl Object3d {
         self
     }
 
+    pub fn set_position(
+        &mut self,
+        position: Vector3
+    ) -> &mut Self {
+        self.position = position;
+        self.dirt = true;
+        self
+    }
+
     pub fn set_x(
         &mut self,
         x: f32

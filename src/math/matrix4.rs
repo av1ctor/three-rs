@@ -273,6 +273,57 @@ impl Matrix4 {
         )
     }
 
+    pub fn invert(
+        &self
+    ) -> Self {
+        let s = &self.0;
+
+        let n11 = s[ 0]; let n21 = s[ 1]; let n31 = s[ 2]; let n41 = s[ 3]; 
+        let n12 = s[ 4]; let n22 = s[ 5]; let n32 = s[ 6]; let n42 = s[ 7]; 
+        let n13 = s[ 8]; let n23 = s[ 9]; let n33 = s[10]; let n43 = s[11]; 
+        let n14 = s[12]; let n24 = s[13]; let n34 = s[14]; let n44 = s[15];
+
+        let t11 = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
+		let t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
+		let t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
+		let t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+
+		let det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+
+		if det == 0.0 {
+            return Self([
+                0.0, 0.0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0
+            ]);
+        }
+
+        let det_inv = 1.0 / det;
+
+		Self([
+            t11 * det_inv,
+		    (n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44) * det_inv,
+		    (n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44) * det_inv,
+		    (n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43) * det_inv,
+
+		    t12 * det_inv,
+		    (n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44) * det_inv,
+		    (n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44) * det_inv,
+		    (n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43) * det_inv,
+
+		    t13 * det_inv,
+		    (n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44) * det_inv,
+		    (n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44) * det_inv,
+		    (n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43) * det_inv,
+
+		    t14 * det_inv,
+		    (n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34) * det_inv,
+		    (n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34) * det_inv,
+		    (n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33) * det_inv,
+        ])
+    }
+
     pub fn transpose(
         &self
     ) -> Self {
