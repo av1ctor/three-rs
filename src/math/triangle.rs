@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use super::{vector3::Vector3, plane::Plane};
+use super::{Vector3, Plane};
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Triangle {

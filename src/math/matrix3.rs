@@ -1,7 +1,15 @@
 use super::{vector3::Vector3, matrix4::Matrix4};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Matrix3(pub [f32; 3*3]);
+
+impl Default for Matrix3 {
+    fn default(
+    ) -> Self {
+        Self::identity()
+    }
+}
+
 
 impl Matrix3 {
     pub fn new(
@@ -20,6 +28,15 @@ impl Matrix3 {
         e[6] = m.0[6]; e[7] = m.0[7]; e[8] = m.0[8];
 
         Self(e)
+    }
+
+    pub fn identity(
+    ) -> Self {
+        Self([
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+        ])
     }
 
     pub fn mul_scalar(

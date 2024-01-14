@@ -1,8 +1,8 @@
 use serde::{Serialize, Deserialize};
 use super::{
-    vector3::Vector3, 
-    matrix4::Matrix4, 
-    quaternion::Quaternion
+    Vector3, 
+    Matrix4, 
+    Quaternion
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]

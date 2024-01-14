@@ -1,4 +1,4 @@
-use super::{vector3::Vector3, line3::Line3};
+use super::{Vector3, Line3};
 
 #[derive(Clone, Default)]
 pub struct Path3 {

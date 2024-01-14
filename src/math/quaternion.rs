@@ -1,8 +1,8 @@
 use serde::{Serialize, Deserialize};
 use super::{
-    euler::{EulerOrder, Euler}, 
-    vector3::{Vector3, RIGHT, UP, FORWARD}, 
-    matrix3::Matrix3
+    {EulerOrder, Euler}, 
+    {Vector3, RIGHT, UP, FORWARD}, 
+    Matrix3
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]

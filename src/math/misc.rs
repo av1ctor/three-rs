@@ -1,4 +1,4 @@
-use super::{line3::Line3, vector3::Vector3};
+use super::{Line3, Vector3};
 
 const EPS: f32 = 1e-10;
 

@@ -8,5 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 serde = {version = "1.0.193", default-features = false, features = ["derive"]}
+glow = "0.13.0"
+sdl2 = "0.36.0"
 gltf = {version = "1.4.0", features = ["import"]}
 ulid = {version = "1.0.0", features = [], default-features = false}

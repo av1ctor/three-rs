@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use super::{
     vector3::Vector3, 
     quaternion::Quaternion, 
@@ -9,8 +7,16 @@ use super::{
 const ZERO: Vector3 = Vector3{x: 0.0, y: 0.0, z: 0.0};
 const ONE: Vector3 = Vector3{x: 1.0, y: 1.0, z: 1.0};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
+#[repr(C)]
 pub struct Matrix4(pub [f32; 4*4]);
+
+impl Default for Matrix4 {
+    fn default(
+    ) -> Self {
+        Self::identity()
+    }
+}
 
 impl Matrix4 {
     pub fn from_slice(
@@ -33,13 +39,12 @@ impl Matrix4 {
     pub fn from_translation(
         v: &Vector3
     ) -> Self {
-        let e = [
+        Self([
             0.0, 0.0, 0.0, v.x,
             0.0, 0.0, 0.0, v.y,
             0.0, 0.0, 0.0, v.z,
             0.0, 0.0, 0.0, 1.0,
-        ];
-        Self(e)
+        ])
     }
 
     pub fn from_quaternion(
@@ -54,14 +59,12 @@ impl Matrix4 {
 		let c = theta.cos();
         let s = theta.sin();
 
-		let e = [
+		Self([
 			1.0, 0.0, 0.0, 0.0,
 			0.0,   c,  -s, 0.0,
 			0.0,   s,   c, 0.0,
 			0.0, 0.0, 0.0, 1.0
-        ];
-
-		Self(e)
+        ])
 	}
 
 	pub fn from_rotation_y( 
@@ -70,14 +73,12 @@ impl Matrix4 {
 		let c = theta.cos();
         let s = theta.sin();
 
-		let e = [
+		Self([
               c, 0.0,   s, 0.0,
             0.0, 1.0, 0.0, 0.0,
              -s, 0.0,   c, 0.0,
             0.0, 0.0, 0.0, 1.0
-        ];
-
-		Self(e)
+        ])
 	}
 
 	pub fn from_rotation_z( 
@@ -86,14 +87,12 @@ impl Matrix4 {
 		let c = theta.cos();
         let s = theta.sin();
 
-		let e = [
+		Self([
 			  c,  -s, 0.0, 0.0,
 			  s,   c, 0.0, 0.0,
 			0.0, 0.0, 1.0, 0.0,
 			0.0, 0.0, 0.0, 1.0
-        ];
-
-        Self(e)
+        ])
 	}
 
     pub fn from_scale(
@@ -102,14 +101,12 @@ impl Matrix4 {
         z: f32 
     ) -> Self {
 
-		let e = [
+		Self([
               x, 0.0, 0.0, 0.0,
 			0.0,   y, 0.0, 0.0,
 			0.0, 0.0,   z, 0.0,
 			0.0, 0.0, 0.0, 1.0
-        ];
-
-		Self(e)
+        ])
 	}
 
 	pub fn from_shear( 
@@ -121,25 +118,28 @@ impl Matrix4 {
         zy: f32
     ) -> Self {
 
-		let e = [
+		Self([
 			1.0,  yx,  zx, 0.0,
 			 xy, 1.0,  zy, 0.0,
 			 xz,  yz, 1.0, 0.0,
 			0.0, 0.0, 0.0, 1.0
-        ];
-
-		Self(e)
+        ])
 	}
 
     pub fn identity(
     ) -> Self {
-        let e = [
+        Self([
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0,
-        ];
-        Self(e)
+        ])
+    }
+
+    pub fn to_slice(
+        &self
+    ) -> &[f32] {
+        &self.0
     }
 
     pub fn mul(
@@ -404,7 +404,7 @@ impl Matrix4 {
 			z.z = 1.0;
 		}
 
-		z.normalize();
+		z = z.normalize();
         let mut x = up.cross(&z);
 
 		if x.length_sq() == 0.0 {
@@ -418,17 +418,15 @@ impl Matrix4 {
 			x = up.cross(&z);
 		}
 
-		x.normalize();
+		x = x.normalize();
 		let y = z.cross(&x);
 
-        let mut e = [0f32; 4*4];
-
-		e[ 0] = x.x; e[ 1] = x.y; e[ 2] = x.z; e[ 3] = 0.0;
-        e[ 4] = y.x; e[ 5] = y.y; e[ 6] = y.z; e[ 7] = 0.0;
-        e[ 8] = z.x; e[ 9] = z.y; e[10] = z.z; e[11] = 0.0;
-        e[12] = 0.0; e[13] = 0.0; e[14] = 0.0; e[15] = 1.0;
-
-		Self(e)
+		Self([
+            x.x, x.y, x.z, 0.0,
+            y.x, y.y, y.z, 0.0,
+            z.x, z.y, z.z, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        ])
 	}
 
     pub fn perspective(
@@ -448,29 +446,34 @@ impl Matrix4 {
 		let c = -(far + near) / (far - near);
         let d = (-2.0 * far * near) / (far - near);
 
-        let mut e = [0f32; 4*4];
-
-		e[ 0] =   x; e[ 1] = 0.0; e[ 2] = 0.0; e[ 3] =  0.0;	
-        e[ 4] = 0.0; e[ 5] =   y; e[ 6] = 0.0; e[ 7] =  0.0;	
-        e[ 8] =   a; e[ 9] =   b; e[10] =   c; e[11] = -1.0;	
-        e[12] = 0.0; e[13] = 0.0; e[14] =   d; e[15] =  0.0;
-
-        Self(e)
+		Self([
+              x, 0.0, 0.0,  0.0,	
+            0.0,   y, 0.0,  0.0,	
+              a,   b,   c, -1.0,	
+            0.0, 0.0,   d,  0.0,
+        ])
 	}
 
     pub fn perspective_fov(
         fov: f32,
         aspect: f32,
         near: f32, 
-        far: f32, 
-        zoom: f32
+        far: f32
     ) -> Self {
-		let top = near * (0.5 * fov * PI / 180.0).tan() / zoom;
-		let height = 2.0 * top;
-		let width = aspect * height;
-		let left = -0.5 * width;
+		let tan_half_fov = (fov / 2.0).tan();
 
-        Self::perspective(left, left + width, top, top - height, near, far)
+        let x = 1.0 / (aspect * tan_half_fov);
+        let y = 1.0 / tan_half_fov;
+
+        let a = -(far + near) / (far - near);
+        let b = -(2.0 * far * near) / (far - near);
+        
+        Self([
+             x, 0.0, 0.0,  0.0,	
+            0.0,  y, 0.0,  0.0,	
+            0.0, 0.0,  a, -1.0,	
+            0.0, 0.0,  b,  0.0,
+        ])
     }
 
     pub fn rotate(

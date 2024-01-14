@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 use serde::{Serialize, Deserialize};
 use super::{
-    triangle::Triangle, 
-    box3::Box3, 
-    vector3::Vector3, 
-    matrix4::Matrix4, 
-    ray::Ray, 
-    capsule::Capsule
+    Triangle, 
+    Box3, 
+    Vector3, 
+    Matrix4, 
+    Ray, 
+    Capsule
 };
 
 #[derive(Clone, Serialize, Deserialize)]

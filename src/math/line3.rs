@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use super::vector3::Vector3;
+use super::Vector3;
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct Line3 {

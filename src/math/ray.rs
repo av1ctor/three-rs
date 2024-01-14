@@ -1,4 +1,4 @@
-use super::{vector3::Vector3, box3::Box3, triangle::Triangle};
+use super::{Vector3, Box3, Triangle};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Ray {

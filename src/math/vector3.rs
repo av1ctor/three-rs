@@ -1,12 +1,13 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, ptr::addr_of};
 use serde::{Serialize, Deserialize};
-use super::{matrix4::Matrix4, quaternion::Quaternion, euler::Euler};
+use super::{Matrix4, Quaternion, Euler};
 
 pub const RIGHT: Vector3 = Vector3{x: 1.0, y: 0.0, z: 0.0};
 pub const UP: Vector3 = Vector3{x: 0.0, y: 1.0, z: 0.0};
 pub const FORWARD: Vector3 = Vector3{x: 0.0, y: 0.0, z: 1.0};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[repr(C)]
 pub struct Vector3 {
     pub x: f32,
     pub y: f32,
@@ -68,6 +69,15 @@ impl Vector3 {
         &self
     ) -> [f32; 3] {
         [self.x, self.y, self.z]
+    }
+
+    pub unsafe fn to_bytes(
+        &self
+    ) -> &[u8] {
+        core::slice::from_raw_parts(
+            addr_of!(self.x) as *const u8,
+            3 * core::mem::size_of::<f32>(),
+        )
     }
 
     pub fn zero(

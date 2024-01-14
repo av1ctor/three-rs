@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use super::{
-    vector3::Vector3, 
-    box3::Box3, 
-    triangle::Triangle, 
-    line3::Line3, 
+    Vector3, 
+    Box3, 
+    Triangle, 
+    Line3, 
     misc::line_to_line_closest_points
 };
 

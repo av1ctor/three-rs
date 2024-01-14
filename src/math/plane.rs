@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use super::vector3::Vector3;
+use super::Vector3;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Plane {
