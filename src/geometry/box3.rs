@@ -2,7 +2,7 @@ use std::{rc::Rc, cell::RefCell};
 use glow::TRIANGLES;
 use crate::{core::{Object3d, RenderableObject}, math::Vector3};
 
-pub struct Box {
+pub struct Box3 {
     pub base: Object3d,
 }
 
@@ -12,7 +12,7 @@ enum Coords {
     XYZ
 }
 
-impl Box {
+impl Box3 {
     pub fn new(
         width: f32,
         height: f32,
@@ -168,7 +168,7 @@ impl Box {
     }
 }
 
-impl RenderableObject for Box {
+impl RenderableObject for Box3 {
     fn get_base(
         &self
     ) -> &Object3d {
