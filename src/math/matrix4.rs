@@ -418,8 +418,6 @@ impl Matrix4 {
             sx = -sx
         };
 
-		let position = Vector3::new(e[12], e[13], e[14]);
-
 		let mut rm = Matrix3::from_matrix4(&self);
 
 		let inv_sx = 1.0 / sx;
@@ -438,8 +436,8 @@ impl Matrix4 {
 		rm.0[7] *= inv_sz;
 		rm.0[8] *= inv_sz;
 
+		let position = Vector3::new(e[12], e[13], e[14]);
 		let quaternion = Quaternion::from_matrix(&rm);
-
 		let scale = Vector3::new(sx, sy, sz);
 
         (position, quaternion, scale)

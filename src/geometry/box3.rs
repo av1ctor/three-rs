@@ -2,8 +2,9 @@ use std::{rc::Rc, cell::RefCell};
 use glow::TRIANGLES;
 use crate::{core::{Object3d, RenderableObject}, math::{Vector3, Matrix4}};
 
+#[derive(Clone)]
 pub struct Box3 {
-    pub base: Object3d,
+    pub obj: Object3d,
 }
 
 enum Coords {
@@ -21,7 +22,7 @@ impl Box3 {
         height_segs: usize,
         depth_segs: usize
     ) -> Rc<RefCell<Self>> {
-        let mut base = Object3d::new(
+        let mut obj = Object3d::new(
             0, 
             TRIANGLES, 
             vec![], 
@@ -32,7 +33,7 @@ impl Box3 {
         let mut num_vertices = 0;
 
         num_vertices += Self::build_plane(
-            &mut base, 
+            &mut obj, 
             Coords::ZYX, 
             -1.0, -1.0, 
             depth, height, width, 
@@ -41,7 +42,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut base, 
+            &mut obj, 
             Coords::ZYX, 
             1.0, -1.0, 
             depth, height, -width, 
@@ -50,7 +51,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut base, 
+            &mut obj, 
             Coords::XZY, 
             1.0, 1.0, 
             width, depth, height, 
@@ -59,7 +60,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut base, 
+            &mut obj, 
             Coords::XZY, 
             1.0, -1.0, 
             width, depth, -height, 
@@ -68,7 +69,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut base, 
+            &mut obj, 
             Coords::XYZ, 
             1.0, -1.0, 
             width, height, depth, 
@@ -77,7 +78,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut base, 
+            &mut obj, 
             Coords::XYZ, 
             -1.0, -1.0, 
             width, height, -depth, 
@@ -89,16 +90,16 @@ impl Box3 {
         let inc = 1.0 / num_vertices as f32;
         for _ in 0..num_vertices {
             color += inc;
-            base.colors.push([0.0, 0.0, color]);
+            obj.colors.push([0.0, 0.0, color]);
         }
         
         Rc::new(RefCell::new(Self {
-            base
+            obj
         }))
     }
 
     fn build_plane(
-        base: &mut Object3d, 
+        obj: &mut Object3d, 
         coords: Coords, 
         udir: f32, 
         vdir: f32, 
@@ -146,7 +147,7 @@ impl Box3 {
                     },
                 }
 
-                base.positions.push(vector);
+                obj.positions.push(vector);
 
                 vertex_counter += 1;
             }
@@ -159,8 +160,8 @@ impl Box3 {
                 let c = (num_vertices + (ix + 1) + grid_x1 * (iy + 1)) as u32;
                 let d = (num_vertices + (ix + 1) + grid_x1 * iy) as u32;
 
-                base.indices.extend_from_slice(&[a, b, d]);
-                base.indices.extend_from_slice(&[b, c, d]);
+                obj.indices.extend_from_slice(&[a, b, d]);
+                obj.indices.extend_from_slice(&[b, c, d]);
             }
         }
 
@@ -169,16 +170,16 @@ impl Box3 {
 }
 
 impl RenderableObject for Box3 {
-    fn get_base(
+    fn get_object(
         &self
     ) -> &Object3d {
-        &self.base
+        &self.obj
     }
 
-    fn get_base_mut(
+    fn get_object_mut(
         &mut self
     ) -> &mut Object3d {
-        &mut self.base
+        &mut self.obj
     }
 
     fn drop(
@@ -190,9 +191,9 @@ impl RenderableObject for Box3 {
 
     fn render(
         &mut self, 
-        parent_matrix: Option<&Matrix4>,
+        world_matrix: Option<&Matrix4>,
         renderer: &crate::renderer::GlRenderer
     ) {
-        (self as &mut dyn RenderableObject).draw(parent_matrix, renderer)
+        (self as &mut dyn RenderableObject).draw(world_matrix, renderer)
     }
 }

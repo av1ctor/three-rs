@@ -9,7 +9,6 @@ use crate::math::{
 };
 use super::{RGB, RenderableObject};
 
-#[derive(Clone)]
 pub struct Object3d {
     pub(crate) _id: usize,
     
@@ -33,13 +32,44 @@ pub struct Object3d {
     pub(crate) dirt: bool,
     
     pub(crate) matrix: Matrix4,
+    pub(crate) world_matrix: Matrix4,
     pub(crate) _mv_matrix: Matrix4,
-    pub(crate) _matrix_world: Matrix4,
     
     pub cast_shadow: bool,
     pub receive_shadow: bool,
     pub frustum_culled: bool,
     pub render_order: usize,
+}
+
+impl Clone for Object3d {
+    fn clone(
+        &self
+    ) -> Self {
+        Self { 
+            _id: self._id + 1,  //FIXME
+            visible: self.visible, 
+            mode: self.mode, 
+            indices: self.indices.clone(), 
+            positions: self.positions.clone(), 
+            colors: self.colors.clone(), 
+            vbo: None, 
+            ebo: None, 
+            vao: None, 
+            children: vec![], 
+            position: self.position.clone(), 
+            rotation: self.rotation.clone(), 
+            quaternion: self.quaternion.clone(), 
+            scale: self.scale.clone(), 
+            dirt: self.dirt, 
+            matrix: self.matrix.clone(), 
+            _mv_matrix: self._mv_matrix.clone(), 
+            world_matrix: self.world_matrix.clone(), 
+            cast_shadow: self.cast_shadow,
+            receive_shadow: self.receive_shadow, 
+            frustum_culled: self.frustum_culled, 
+            render_order: self.render_order
+        }
+    }
 }
 
 impl Object3d {
@@ -66,9 +96,9 @@ impl Object3d {
             quaternion: Quaternion::default(), 
             scale: Vector3::one(), 
             dirt: false,
-            _mv_matrix: Matrix4::identity(), 
             matrix: Matrix4::identity(), 
-            _matrix_world: Matrix4::identity(), 
+            world_matrix: Matrix4::identity(), 
+            _mv_matrix: Matrix4::identity(), 
             cast_shadow: true, 
             receive_shadow: true, 
             frustum_culled: true, 
@@ -92,7 +122,7 @@ impl Object3d {
         );
     }
 
-    pub(crate) fn update_matrix(
+    pub fn update_matrix(
         &mut self
     ) {
         if self.dirt {

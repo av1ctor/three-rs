@@ -4,11 +4,11 @@ use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer};
 use super::{Object3d, RGB};
 
 pub trait RenderableObject {
-    fn get_base(
+    fn get_object(
         &self
     ) -> &Object3d;
 
-    fn get_base_mut(
+    fn get_object_mut(
         &mut self
     ) -> &mut Object3d;
 
@@ -19,7 +19,7 @@ pub trait RenderableObject {
 
     fn render(
         &mut self, 
-        parent_matrix: Option<&Matrix4>,
+        world_matrix: Option<&Matrix4>,
         renderer: &GlRenderer
     );
 }
@@ -29,17 +29,17 @@ impl dyn RenderableObject {
         &mut self, 
         renderer: &GlRenderer
     ) {
-        if self.get_base().vbo.is_some() {
+        if self.get_object().vbo.is_some() {
             return;
         }
         
         let gl = &renderer.gl;
 
         {
-            let base = self.get_base_mut();
-            base.vbo = Some(gl.create_buffer().unwrap());
-            base.ebo = Some(gl.create_buffer().unwrap());
-            base.vao = Some(gl.create_vertex_array().unwrap());
+            let obj = self.get_object_mut();
+            obj.vbo = Some(gl.create_buffer().unwrap());
+            obj.ebo = Some(gl.create_buffer().unwrap());
+            obj.vao = Some(gl.create_vertex_array().unwrap());
         }
         
         // vbos
@@ -62,9 +62,9 @@ impl dyn RenderableObject {
         gl: &Context,
         attrib_locations: (u32, u32)
     ) {
-        let base = self.get_base();
+        let obj = self.get_object();
 
-        gl.bind_vertex_array(base.vao);
+        gl.bind_vertex_array(obj.vao);
         
         gl.vertex_attrib_pointer_f32(
             attrib_locations.0, 
@@ -81,7 +81,7 @@ impl dyn RenderableObject {
             FLOAT, 
             false, 
             size_of::<RGB>() as _, 
-            (size_of::<Vector3>() * base.positions.len()) as _
+            (size_of::<Vector3>() * obj.positions.len()) as _
         );
     }
 
@@ -89,14 +89,14 @@ impl dyn RenderableObject {
         &self, 
         gl: &Context 
     ) {
-        let base = self.get_base();
+        let obj = self.get_object();
 
         let indices = from_raw_parts(
-            base.indices.as_ptr() as *const u8,
-            size_of::<u32>() * base.indices.len()
+            obj.indices.as_ptr() as *const u8,
+            size_of::<u32>() * obj.indices.len()
         );
 
-        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, base.ebo);
+        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, obj.ebo);
         gl.buffer_data_u8_slice(ELEMENT_ARRAY_BUFFER, indices, STATIC_DRAW);
     }
 
@@ -104,21 +104,21 @@ impl dyn RenderableObject {
         &self, 
         gl: &Context 
     ) {
-        let base = self.get_base();
+        let obj = self.get_object();
 
-        let num_vertices = base.positions.len();
+        let num_vertices = obj.positions.len();
         
         let positions = from_raw_parts(
-            base.positions.as_ptr() as *const u8,
+            obj.positions.as_ptr() as *const u8,
             size_of::<Vector3>() * num_vertices
         );
 
         let colors = from_raw_parts(
-            base.colors.as_ptr() as *const u8,
+            obj.colors.as_ptr() as *const u8,
             size_of::<RGB>() * num_vertices
         );
 
-        gl.bind_buffer(ARRAY_BUFFER, base.vbo);
+        gl.bind_buffer(ARRAY_BUFFER, obj.vbo);
         gl.buffer_data_size(ARRAY_BUFFER, (positions.len() + colors.len()) as _, STATIC_DRAW);
         gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, 0, positions);
         gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, positions.len() as _, colors);
@@ -128,15 +128,15 @@ impl dyn RenderableObject {
         &self,
         renderer: &GlRenderer
     ) {
-        let base = self.get_base();
+        let obj = self.get_object();
         let gl = &renderer.gl;
 
-        gl.bind_vertex_array(base.vao);
+        gl.bind_vertex_array(obj.vao);
         gl.enable_vertex_attrib_array(renderer.attrib_locations.0);
         gl.enable_vertex_attrib_array(renderer.attrib_locations.1);
 
-        gl.bind_buffer(ARRAY_BUFFER, base.vbo);
-        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, base.ebo);
+        gl.bind_buffer(ARRAY_BUFFER, obj.vbo);
+        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, obj.ebo);
     }
 
     unsafe fn unbind(
@@ -155,29 +155,32 @@ impl dyn RenderableObject {
 
     unsafe fn update(
         &mut self,
-        parent_matrix: Option<&Matrix4>,
+        world_matrix: Option<&Matrix4>,
         renderer: &GlRenderer
     ) -> bool {
-        
-
         self.upload(renderer);
 
-        let base = self.get_base_mut();
+        let obj = self.get_object_mut();
 
-        let mut updated = base.dirt;
-        base.update_matrix();
+        let mut updated = obj.dirt;
+        obj.update_matrix();
 
-        if let Some(matrix) = parent_matrix {
-            base.apply_matrix(matrix);
+        if let Some(world_matrix) = world_matrix {
             updated = true;
+            obj.world_matrix = world_matrix.mul(&obj.matrix);
         } 
+        else {
+            if updated {
+                obj.world_matrix = obj.matrix.clone();
+            }
+        }
 
         let gl = &renderer.gl;
 
         gl.uniform_matrix_4_f32_slice(
             Some(&renderer.uniform_locations.model), 
             false, 
-            base.matrix.to_slice()
+            obj.world_matrix.to_slice()
         );
 
         updated
@@ -185,35 +188,35 @@ impl dyn RenderableObject {
 
     pub fn draw(
         &mut self,
-        parent_matrix: Option<&Matrix4>,
+        world_matrix: Option<&Matrix4>,
         renderer: &GlRenderer
     ) {
         unsafe {
-            let updated = self.update(parent_matrix, renderer);
+            let updated = self.update(world_matrix, renderer);
             self.bind(renderer);
             
-            let base = self.get_base();
+            let obj = self.get_object();
             let gl = &renderer.gl;
 
             gl.draw_elements(
-                base.mode as _, 
-                base.indices.len() as _, 
+                obj.mode as _, 
+                obj.indices.len() as _, 
                 UNSIGNED_INT, 
                 0
             );
 
             self.unbind(renderer);
 
-            let parent_matrix = if updated {
-                Some(&base.matrix)
+            let world_matrix = if updated {
+                Some(&obj.matrix)
             } 
             else {
                 None
             };
 
-            for child in &base.children {
+            for child in &obj.children {
                 child.borrow_mut().render(
-                    parent_matrix,
+                    world_matrix,
                     renderer
                 );
             }
@@ -225,16 +228,16 @@ impl dyn RenderableObject {
         renderer: &GlRenderer
     ) {
         unsafe {
-            let base = self.get_base();
+            let obj = self.get_object();
             let gl = &renderer.gl;
 
-            if let Some(vao) = base.vao {
+            if let Some(vao) = obj.vao {
                 gl.delete_vertex_array(vao);
             }
-            if let Some(ebo) = base.ebo {
+            if let Some(ebo) = obj.ebo {
                 gl.delete_buffer(ebo);
             }
-            if let Some(vbo) = base.vbo {
+            if let Some(vbo) = obj.vbo {
                 gl.delete_buffer(vbo);
             }
         }

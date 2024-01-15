@@ -53,7 +53,7 @@ impl Scene {
 
             for object in &mut self.objects {
                 let obj = &mut object.borrow_mut();
-                if obj.get_base().visible {
+                if obj.get_object().visible {
                     obj.render(None, renderer);
                 }
             }
