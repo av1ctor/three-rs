@@ -1,5 +1,5 @@
 use glow::*;
-use crate::math::{Matrix4, {Vector3, UP}};
+use crate::math::Matrix4;
 
 const VERTEX_SHADER_SOURCE: &str = include_str!("../shaders/vertex.glsl");
 const FRAGMENT_SHADER_SOURCE: &str = include_str!("../shaders/frag.glsl");
@@ -132,11 +132,7 @@ impl GlRenderer {
         let proj = Matrix4::identity();
         gl.uniform_matrix_4_f32_slice(Some(&projection_loc), false, proj.to_slice());
 
-        let view = Matrix4::look_at(
-            &Vector3::new(0.0, 0.0, 0.0), 
-            &Vector3::new(0.0, 0.0, 0.0), 
-            &UP
-        );
+        let view = Matrix4::identity();
         gl.uniform_matrix_4_f32_slice(Some(&view_loc), false, view.to_slice());
         
         gl.viewport(0, 0, w as _, h as _);
