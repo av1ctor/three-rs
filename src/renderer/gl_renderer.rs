@@ -129,8 +129,11 @@ impl GlRenderer {
         let view_loc = gl.get_uniform_location(*program, "view").unwrap();
         let model_loc = gl.get_uniform_location(*program, "model").unwrap();
 
+        let proj = Matrix4::identity();
+        gl.uniform_matrix_4_f32_slice(Some(&projection_loc), false, proj.to_slice());
+
         let view = Matrix4::look_at(
-            &Vector3::new(0.0, 10.0, 50.0), 
+            &Vector3::new(0.0, 0.0, 0.0), 
             &Vector3::new(0.0, 0.0, 0.0), 
             &UP
         );
