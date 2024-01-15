@@ -1,6 +1,6 @@
 use std::{mem::size_of, slice::from_raw_parts};
 use glow::*;
-use crate::{math::vector3::Vector3, renderer::GlRenderer};
+use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer};
 use super::{Object3d, RGB};
 
 pub trait RenderableObject {
@@ -19,6 +19,7 @@ pub trait RenderableObject {
 
     fn render(
         &mut self, 
+        parent_matrix: Option<&Matrix4>,
         renderer: &GlRenderer
     );
 }
@@ -154,16 +155,22 @@ impl dyn RenderableObject {
 
     unsafe fn update(
         &mut self,
+        parent_matrix: Option<&Matrix4>,
         renderer: &GlRenderer
-    ) {
+    ) -> bool {
+        
+
         self.upload(renderer);
 
-        let mut base = self.get_base_mut();
+        let base = self.get_base_mut();
 
-        if base.dirt {
-            base.update_matrix();
-            base.dirt = false;
-        }
+        let mut updated = base.dirt;
+        base.update_matrix();
+
+        if let Some(matrix) = parent_matrix {
+            base.apply_matrix(matrix);
+            updated = true;
+        } 
 
         let gl = &renderer.gl;
 
@@ -172,15 +179,17 @@ impl dyn RenderableObject {
             false, 
             base.matrix.to_slice()
         );
+
+        updated
     }
 
     pub fn draw(
-        &mut self, 
+        &mut self,
+        parent_matrix: Option<&Matrix4>,
         renderer: &GlRenderer
     ) {
         unsafe {
-            self.update(renderer);
-            
+            let updated = self.update(parent_matrix, renderer);
             self.bind(renderer);
             
             let base = self.get_base();
@@ -194,6 +203,20 @@ impl dyn RenderableObject {
             );
 
             self.unbind(renderer);
+
+            let parent_matrix = if updated {
+                Some(&base.matrix)
+            } 
+            else {
+                None
+            };
+
+            for child in &base.children {
+                child.borrow_mut().render(
+                    parent_matrix,
+                    renderer
+                );
+            }
         }
     }
 

@@ -426,17 +426,17 @@ impl Matrix4 {
 		let inv_sy = 1.0 / sy;
 		let inv_sz = 1.0 / sz;
 
-		rm.0[ 0] *= inv_sx;
-		rm.0[ 1] *= inv_sx;
-		rm.0[ 2] *= inv_sx;
+		rm.0[0] *= inv_sx;
+		rm.0[1] *= inv_sx;
+		rm.0[2] *= inv_sx;
 
-		rm.0[ 4] *= inv_sy;
-		rm.0[ 5] *= inv_sy;
-		rm.0[ 6] *= inv_sy;
+		rm.0[3] *= inv_sy;
+		rm.0[4] *= inv_sy;
+		rm.0[5] *= inv_sy;
 
-		rm.0[ 8] *= inv_sz;
-		rm.0[ 9] *= inv_sz;
-		rm.0[10] *= inv_sz;
+		rm.0[6] *= inv_sz;
+		rm.0[7] *= inv_sz;
+		rm.0[8] *= inv_sz;
 
 		let quaternion = Quaternion::from_matrix(&rm);
 

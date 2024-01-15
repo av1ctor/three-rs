@@ -7,8 +7,9 @@ use crate::math::{
     Matrix4, 
     Matrix3
 };
-use super::RGB;
+use super::{RGB, RenderableObject};
 
+#[derive(Clone)]
 pub struct Object3d {
     pub(crate) _id: usize,
     
@@ -23,8 +24,7 @@ pub struct Object3d {
     pub(crate) ebo: Option<NativeBuffer>,
     pub(crate) vao: Option<NativeVertexArray>,
     
-    pub(crate) _parent: Option<Rc<RefCell<Self>>>,
-    pub(crate) _children: Vec<Rc<RefCell<Self>>>,
+    pub(crate) children: Vec<Rc<RefCell<dyn RenderableObject>>>,
     
     pub(crate) position: Vector3,
     pub(crate) rotation: Euler,
@@ -52,8 +52,7 @@ impl Object3d {
 ) -> Self {
         Self { 
             _id: id, 
-            _parent: None,
-            _children: vec![], 
+            children: vec![], 
             visible: true, 
             mode,
             indices,
@@ -77,6 +76,14 @@ impl Object3d {
         }
     }
 
+    pub fn add(
+        &mut self,
+        child: Rc<RefCell<dyn RenderableObject>>
+    ) -> &mut Self {
+        self.children.push(child);
+        self
+    }
+
     fn on_quaternion_updated(
         &mut self
     ) {
@@ -88,18 +95,18 @@ impl Object3d {
     pub(crate) fn update_matrix(
         &mut self
     ) {
-        self.matrix = Matrix4::compose(
-            &self.position, &self.quaternion, &self.scale
-        );
-        self.dirt = false;
+        if self.dirt {
+            self.matrix = Matrix4::compose(
+                &self.position, &self.quaternion, &self.scale
+            );
+            self.dirt = false;
+        }
     }
 
     pub fn apply_matrix(
         &mut self,
         m: &Matrix4
     ) -> &mut Self {
-        self.update_matrix();
-
         self.matrix = m.mul(&self.matrix);
         
         let (position, quaternion, scale) = self.matrix.decompose();

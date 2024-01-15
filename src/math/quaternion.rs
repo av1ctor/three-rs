@@ -91,9 +91,9 @@ impl Quaternion {
     pub fn from_matrix(
         m: &Matrix3
     ) -> Self {
-        let m11 = m.0[ 0]; let m21 = m.0[ 1]; let m31 = m.0[ 2];
-        let m12 = m.0[ 4]; let m22 = m.0[ 5]; let m32 = m.0[ 6];
-        let m13 = m.0[ 8]; let m23 = m.0[ 9]; let m33 = m.0[10];
+        let m11 = m.0[0]; let m21 = m.0[1]; let m31 = m.0[2];
+        let m12 = m.0[3]; let m22 = m.0[4]; let m32 = m.0[5];
+        let m13 = m.0[6]; let m23 = m.0[7]; let m33 = m.0[8];
 
         let trace = m11 + m22 + m33;
 

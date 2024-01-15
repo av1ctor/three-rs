@@ -1,6 +1,6 @@
 use std::{rc::Rc, cell::RefCell};
 use glow::TRIANGLES;
-use crate::{core::{Object3d, RenderableObject}, math::Vector3};
+use crate::{core::{Object3d, RenderableObject}, math::{Vector3, Matrix4}};
 
 pub struct Box3 {
     pub base: Object3d,
@@ -190,8 +190,9 @@ impl RenderableObject for Box3 {
 
     fn render(
         &mut self, 
+        parent_matrix: Option<&Matrix4>,
         renderer: &crate::renderer::GlRenderer
     ) {
-        (self as &mut dyn RenderableObject).draw(renderer)
+        (self as &mut dyn RenderableObject).draw(parent_matrix, renderer)
     }
 }
