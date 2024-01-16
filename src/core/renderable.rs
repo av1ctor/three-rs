@@ -1,6 +1,10 @@
 use std::{mem::size_of, slice::from_raw_parts};
 use glow::*;
-use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer, camera::PerspectiveCamera};
+use crate::{
+    math::{vector3::Vector3, Matrix4}, 
+    renderer::GlRenderer, 
+    camera::ObjectifiableCamera
+};
 use super::{RGB, Objectifiable, Geometrical};
 
 pub trait Renderable
@@ -8,7 +12,7 @@ pub trait Renderable
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
-        camera: &PerspectiveCamera,
+        camera: &dyn ObjectifiableCamera,
         renderer: &GlRenderer
     );
 }
@@ -145,7 +149,7 @@ impl dyn Renderable {
     unsafe fn update(
         &mut self,
         world_matrix: Option<&Matrix4>,
-        camera: &PerspectiveCamera,
+        camera: &dyn ObjectifiableCamera,
         renderer: &GlRenderer
     ) -> bool {
         self.upload(renderer);
@@ -165,7 +169,7 @@ impl dyn Renderable {
             }
         }
 
-        let model_view_matrix = camera.cam.world_matrix_inverse.mul(&obj.world_matrix);
+        let model_view_matrix = camera.get_data().world_matrix_inverse.mul(&obj.world_matrix);
 
         let gl = &renderer.gl;
 
@@ -181,7 +185,7 @@ impl dyn Renderable {
     pub fn draw(
         &mut self,
         world_matrix: Option<&Matrix4>,
-        camera: &PerspectiveCamera,
+        camera: &dyn ObjectifiableCamera,
         renderer: &GlRenderer
     ) {
         unsafe {

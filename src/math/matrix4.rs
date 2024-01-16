@@ -534,6 +534,32 @@ impl Matrix4 {
         ])
     }
 
+    pub fn orthographic(
+        left: f32,
+        right: f32,
+        top: f32,
+        bottom: f32,
+        near: f32,
+        far: f32
+    ) -> Self {
+        let w = 1.0 / (right - left);
+		let h = 1.0 / (top - bottom);
+		let p = 1.0 / (far - near);
+
+		let x = (right + left) * w;
+		let y = (top + bottom) * h;
+
+		let z = ( far + near ) * p;
+        let z_inv = -2.0 * p;
+
+        Self([
+            2.0 * w, 0.0    ,   0.0, 0.0, 		
+            0.0    , 2.0 * h,   0.0, 0.0,		
+            0.0    , 0.0    , z_inv, 0.0,		
+                 -x,      -y,    -z, 1.0
+        ])
+    }
+
     pub fn rotate(
         &self,
         a: f32,

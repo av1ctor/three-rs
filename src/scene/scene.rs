@@ -1,6 +1,10 @@
 use std::{rc::Rc, cell::RefCell};
 use glow::*;
-use crate::{core::{GeometricalRenderable, Transformable}, renderer::GlRenderer, camera::PerspectiveCamera};
+use crate::{
+    core::GeometricalRenderable, 
+    renderer::GlRenderer, 
+    camera::ObjectifiableCamera,
+};
 
 pub struct Scene {
     pub renderer: Rc<RefCell<GlRenderer>>,
@@ -37,7 +41,7 @@ impl Scene {
 
     pub fn render(
         &mut self,
-        camera: &mut PerspectiveCamera
+        camera: &mut dyn ObjectifiableCamera
     ) {
         camera.update_matrix();
         
@@ -48,7 +52,7 @@ impl Scene {
             gl.uniform_matrix_4_f32_slice(
                 Some(&renderer.uniform_locations.projection), 
                 false, 
-                camera.cam.proj_matrix.to_slice()
+                camera.get_data().proj_matrix.to_slice()
             );
     
             renderer.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
