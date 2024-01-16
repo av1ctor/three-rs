@@ -136,7 +136,7 @@ impl GlRenderer {
         gl.uniform_matrix_4_f32_slice(Some(&view_loc), false, view.to_slice());
         
         gl.viewport(0, 0, w as _, h as _);
-        gl.enable(DEPTH);
+        gl.enable(DEPTH_TEST);
         gl.enable(COLOR);
         gl.enable(CULL_FACE);
         gl.clear_color(0.0, 0.0, 0.0, 1.0);

@@ -23,7 +23,6 @@ impl Box3 {
         depth_segs: usize
     ) -> Rc<RefCell<Self>> {
         let mut obj = Object3d::new(
-            0, 
             TRIANGLES, 
             vec![], 
             vec![], 

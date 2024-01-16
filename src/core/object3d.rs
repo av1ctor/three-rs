@@ -10,8 +10,6 @@ use crate::math::{
 use super::{RGB, RenderableObject};
 
 pub struct Object3d {
-    pub(crate) _id: usize,
-    
     pub visible: bool,
     
     pub(crate) mode: u32,
@@ -46,7 +44,6 @@ impl Clone for Object3d {
         &self
     ) -> Self {
         Self { 
-            _id: self._id + 1,  //FIXME
             visible: self.visible, 
             mode: self.mode, 
             indices: self.indices.clone(), 
@@ -74,14 +71,12 @@ impl Clone for Object3d {
 
 impl Object3d {
     pub fn new(
-        id: usize,
         mode: u32,
         indices: Vec<u32>,
         positions: Vec<Vector3>,
         colors: Vec<RGB>,
 ) -> Self {
         Self { 
-            _id: id, 
             children: vec![], 
             visible: true, 
             mode,

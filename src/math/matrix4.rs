@@ -536,36 +536,38 @@ impl Matrix4 {
 
     pub fn rotate(
         &self,
-        angle: f32,
+        a: f32,
         axis: &Vector3
     ) -> Self {
         let m = &self.0;
-        let a = angle;
 		let c = a.cos();
 		let s = a.sin();
 
 		let axis = axis.normalize();
 		let temp = axis.mul_scalar(1.0 - c);
 
-		let mut rot = [0.0f32; 4*4];
-		rot[ 0] = c + temp.x * axis.x;
-		rot[ 1] = temp.x * axis.y + s * axis.z;
-		rot[ 2] = temp.x * axis.z - s * axis.y;
+		let rot = [
+            c + temp.x * axis.x,
+            temp.x * axis.y + s * axis.z,
+            temp.x * axis.z - s * axis.y,
 
-		rot[ 4] = temp.y * axis.x - s * axis.z;
-		rot[ 5] = c + temp.y * axis.y;
-		rot[ 6] = temp.y * axis.z + s * axis.x;
+            temp.y * axis.x - s * axis.z,
+            c + temp.y * axis.y,
+            temp.y * axis.z + s * axis.x,
 
-		rot[ 8] = temp.z * axis.x + s * axis.y;
-		rot[ 9] = temp.z * axis.y - s * axis.x;
-		rot[10] = c + temp.z * axis.z;
+            temp.z * axis.x + s * axis.y,
+            temp.z * axis.y - s * axis.x,
+            c + temp.z * axis.z
+        ];
 
-		let mut res = [0.0f32; 4*4];
-		res[0] = m[0] * rot[ 0] + m[1] * rot[ 1] + m[2] * rot[ 2];
-		res[1] = m[0] * rot[ 4] + m[1] * rot[ 5] + m[2] * rot[ 6];
-		res[2] = m[0] * rot[ 8] + m[1] * rot[ 9] + m[2] * rot[10];
-		res[3] = m[3];
-
-        Self(res)
+		Self([
+            m[0] * rot[0] + m[1] * rot[1] + m[2] * rot[2],
+            m[0] * rot[3] + m[1] * rot[4] + m[2] * rot[5],
+            m[0] * rot[6] + m[1] * rot[7] + m[2] * rot[8],
+            m[3],
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+        ])
     }
 }
