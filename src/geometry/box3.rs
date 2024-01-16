@@ -193,6 +193,8 @@ impl RenderableObject for Box3 {
         world_matrix: Option<&Matrix4>,
         renderer: &crate::renderer::GlRenderer
     ) {
-        (self as &mut dyn RenderableObject).draw(world_matrix, renderer)
+        (self as &mut dyn RenderableObject).draw(
+            world_matrix, renderer
+        )
     }
 }

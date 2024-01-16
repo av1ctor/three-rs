@@ -31,7 +31,6 @@ pub struct Object3d {
     
     pub(crate) matrix: Matrix4,
     pub(crate) world_matrix: Matrix4,
-    pub(crate) _mv_matrix: Matrix4,
     
     pub cast_shadow: bool,
     pub receive_shadow: bool,
@@ -59,7 +58,6 @@ impl Clone for Object3d {
             scale: self.scale.clone(), 
             dirt: self.dirt, 
             matrix: self.matrix.clone(), 
-            _mv_matrix: self._mv_matrix.clone(), 
             world_matrix: self.world_matrix.clone(), 
             cast_shadow: self.cast_shadow,
             receive_shadow: self.receive_shadow, 
@@ -93,7 +91,6 @@ impl Object3d {
             dirt: false,
             matrix: Matrix4::identity(), 
             world_matrix: Matrix4::identity(), 
-            _mv_matrix: Matrix4::identity(), 
             cast_shadow: true, 
             receive_shadow: true, 
             frustum_culled: true, 

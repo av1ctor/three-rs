@@ -5,7 +5,7 @@ use crate::math::Matrix4;
 use super::Camera;
 
 pub struct PerspectiveCamera {
-    pub base: Camera,
+    pub camera: Camera,
     pub fov: f32,
     pub zoom: f32,
     pub near: f32,
@@ -24,7 +24,7 @@ impl PerspectiveCamera {
         far: f32
     ) -> Self {
         let mut cam = Self {
-            base: Camera::new(),
+            camera: Camera::new(),
             fov,
             zoom: 1.0,
             near,
@@ -66,10 +66,10 @@ impl PerspectiveCamera {
             left += near * skew / self.get_film_width();
         };
 
-        self.base.projection_matrix = Matrix4::perspective(
+        self.camera.projection_matrix = Matrix4::perspective(
             left, left + width, top, top - height, near, self.far
         );
 
-		self.base.projection_matrix_inverse = self.base.projection_matrix.invert();
+		self.camera.projection_matrix_inverse = self.camera.projection_matrix.invert();
     }
 }

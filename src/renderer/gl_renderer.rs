@@ -6,8 +6,7 @@ const FRAGMENT_SHADER_SOURCE: &str = include_str!("../shaders/frag.glsl");
 
 pub struct ShaderUniformLocations {
     pub projection: UniformLocation,
-    pub view: UniformLocation,
-    pub model: UniformLocation,
+    pub model_view: UniformLocation,
 }
 
 pub struct GlRenderer {
@@ -126,14 +125,13 @@ impl GlRenderer {
         program: &NativeProgram
     ) -> ShaderUniformLocations {
         let projection_loc = gl.get_uniform_location(*program, "projection").unwrap();
-        let view_loc = gl.get_uniform_location(*program, "view").unwrap();
-        let model_loc = gl.get_uniform_location(*program, "model").unwrap();
+        let model_view_loc = gl.get_uniform_location(*program, "model_view").unwrap();
 
         let proj = Matrix4::identity();
         gl.uniform_matrix_4_f32_slice(Some(&projection_loc), false, proj.to_slice());
 
         let view = Matrix4::identity();
-        gl.uniform_matrix_4_f32_slice(Some(&view_loc), false, view.to_slice());
+        gl.uniform_matrix_4_f32_slice(Some(&model_view_loc), false, view.to_slice());
         
         gl.viewport(0, 0, w as _, h as _);
         gl.enable(DEPTH_TEST);
@@ -143,8 +141,7 @@ impl GlRenderer {
 
         ShaderUniformLocations {
             projection: projection_loc,
-            view: view_loc,
-            model: model_loc,
+            model_view: model_view_loc,
         }
    }
 }

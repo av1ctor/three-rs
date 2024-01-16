@@ -178,7 +178,7 @@ impl dyn RenderableObject {
         let gl = &renderer.gl;
 
         gl.uniform_matrix_4_f32_slice(
-            Some(&renderer.uniform_locations.model), 
+            Some(&renderer.uniform_locations.model_view), 
             false, 
             obj.world_matrix.to_slice()
         );
