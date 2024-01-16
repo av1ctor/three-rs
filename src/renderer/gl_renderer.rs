@@ -39,9 +39,11 @@ impl GlRenderer {
     ) -> Self {
         let sdl = sdl2::init().unwrap();
         let video = sdl.video().unwrap();
+        
         let gl_attr = video.gl_attr();
         gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
         gl_attr.set_context_version(3, 3);
+        
         let window = video
             .window(title, w, h)
             .opengl()
@@ -51,6 +53,7 @@ impl GlRenderer {
         let context = window.gl_create_context().unwrap();
         let gl =
             Context::from_loader_function(|s| video.gl_get_proc_address(s) as *const _);
+        
         let events_loop = sdl.event_pump().unwrap();
 
         let program = Self::create_program(&gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
@@ -69,7 +72,6 @@ impl GlRenderer {
             uniform_locations,
             program
         }
-
     }
 
     pub fn poll_events(
@@ -137,6 +139,7 @@ impl GlRenderer {
         gl.enable(DEPTH_TEST);
         gl.enable(COLOR);
         gl.enable(CULL_FACE);
+        gl.enable(MULTISAMPLE);
         gl.clear_color(0.0, 0.0, 0.0, 1.0);
 
         ShaderUniformLocations {

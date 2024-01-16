@@ -229,6 +229,13 @@ impl dyn Renderable {
                     0
                 );
             }
+            else if let Some(positions) = &geo.positions {
+                gl.draw_arrays(
+                    geo.mode as _, 
+                    0, 
+                    positions.len() as _
+                );
+            }
 
             self.unbind(renderer);
 

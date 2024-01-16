@@ -25,8 +25,6 @@ impl Gltf {
         
         let scene = doc.default_scene().unwrap();
         let mut positions = vec![];
-        let mut indices = vec![];
-        let mut idx = 0;
 
         for node in scene.nodes() {
             traverse_meshes(
@@ -48,8 +46,6 @@ impl Gltf {
                                         let v = Vector3::from_slice(&prim_pos[prim_ind[i] as usize])
                                             .apply_matrix4(&world_matrix);
                                         positions.push(v);
-                                        indices.push(idx);
-                                        idx += 1;
                                     }
                                 }
                                 _ => {
@@ -76,7 +72,7 @@ impl Gltf {
             &Self{
                 geo: BufferGeometry::new(
                     TRIANGLES, 
-                    Some(indices), 
+                    None, 
                     Some(positions), 
                     Some(colors)
                 )
