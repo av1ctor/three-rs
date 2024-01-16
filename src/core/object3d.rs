@@ -1,5 +1,4 @@
 use std::{rc::Rc, cell::RefCell};
-use glow::{NativeBuffer, NativeVertexArray};
 use crate::math::{
     {Vector3, RIGHT, UP, FORWARD}, 
     Euler, 
@@ -7,21 +6,12 @@ use crate::math::{
     Matrix4, 
     Matrix3
 };
-use super::{RGB, RenderableObject};
+use super::GeometricalRenderable;
 
 pub struct Object3d {
     pub visible: bool,
     
-    pub(crate) mode: u32,
-    pub(crate) indices: Vec<u32>,
-    pub(crate) positions: Vec<Vector3>,
-    pub(crate) colors: Vec<RGB>,
-    
-    pub(crate) vbo: Option<NativeBuffer>,
-    pub(crate) ebo: Option<NativeBuffer>,
-    pub(crate) vao: Option<NativeVertexArray>,
-    
-    pub(crate) children: Vec<Rc<RefCell<dyn RenderableObject>>>,
+    pub(crate) children: Vec<Rc<RefCell<dyn GeometricalRenderable>>>,
     
     pub(crate) position: Vector3,
     pub(crate) rotation: Euler,
@@ -44,13 +34,6 @@ impl Clone for Object3d {
     ) -> Self {
         Self { 
             visible: self.visible, 
-            mode: self.mode, 
-            indices: self.indices.clone(), 
-            positions: self.positions.clone(), 
-            colors: self.colors.clone(), 
-            vbo: None, 
-            ebo: None, 
-            vao: None, 
             children: vec![], 
             position: self.position.clone(), 
             rotation: self.rotation.clone(), 
@@ -69,21 +52,10 @@ impl Clone for Object3d {
 
 impl Object3d {
     pub fn new(
-        mode: u32,
-        indices: Vec<u32>,
-        positions: Vec<Vector3>,
-        colors: Vec<RGB>,
 ) -> Self {
         Self { 
             children: vec![], 
             visible: true, 
-            mode,
-            indices,
-            positions,
-            colors,
-            vbo: None,
-            ebo: None,
-            vao: None,
             position: Vector3::zero(), 
             rotation: Euler::default(), 
             quaternion: Quaternion::default(), 
@@ -100,7 +72,7 @@ impl Object3d {
 
     pub fn add(
         &mut self,
-        child: Rc<RefCell<dyn RenderableObject>>
+        child: Rc<RefCell<dyn GeometricalRenderable>>
     ) -> &mut Self {
         self.children.push(child);
         self

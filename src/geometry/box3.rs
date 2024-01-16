@@ -1,10 +1,9 @@
-use std::{rc::Rc, cell::RefCell};
 use glow::TRIANGLES;
-use crate::{core::{Object3d, RenderableObject, Object}, math::{Vector3, Matrix4}};
+use crate::{core::{BufferGeometry, Geometrical}, math::Vector3};
 
 #[derive(Clone)]
 pub struct Box3 {
-    pub obj: Object3d,
+    pub geo: BufferGeometry,
 }
 
 enum Coords {
@@ -21,8 +20,8 @@ impl Box3 {
         width_segs: usize,
         height_segs: usize,
         depth_segs: usize
-    ) -> Rc<RefCell<Self>> {
-        let mut obj = Object3d::new(
+    ) -> Self {
+        let mut geo = BufferGeometry::new(
             TRIANGLES, 
             vec![], 
             vec![], 
@@ -32,7 +31,7 @@ impl Box3 {
         let mut num_vertices = 0;
 
         num_vertices += Self::build_plane(
-            &mut obj, 
+            &mut geo, 
             Coords::ZYX, 
             -1.0, -1.0, 
             depth, height, width, 
@@ -41,7 +40,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut obj, 
+            &mut geo, 
             Coords::ZYX, 
             1.0, -1.0, 
             depth, height, -width, 
@@ -50,7 +49,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut obj, 
+            &mut geo, 
             Coords::XZY, 
             1.0, 1.0, 
             width, depth, height, 
@@ -59,7 +58,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut obj, 
+            &mut geo, 
             Coords::XZY, 
             1.0, -1.0, 
             width, depth, -height, 
@@ -68,7 +67,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut obj, 
+            &mut geo, 
             Coords::XYZ, 
             1.0, -1.0, 
             width, height, depth, 
@@ -77,7 +76,7 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut obj, 
+            &mut geo, 
             Coords::XYZ, 
             -1.0, -1.0, 
             width, height, -depth, 
@@ -89,16 +88,16 @@ impl Box3 {
         let inc = 1.0 / num_vertices as f32;
         for _ in 0..num_vertices {
             color += inc;
-            obj.colors.push([0.0, 0.0, color]);
+            geo.colors.push([0.0, 0.0, color]);
         }
         
-        Rc::new(RefCell::new(Self {
-            obj
-        }))
+        Self {
+            geo
+        }
     }
 
     fn build_plane(
-        obj: &mut Object3d, 
+        geo: &mut BufferGeometry, 
         coords: Coords, 
         udir: f32, 
         vdir: f32, 
@@ -146,7 +145,7 @@ impl Box3 {
                     },
                 }
 
-                obj.positions.push(vector);
+                geo.positions.push(vector);
 
                 vertex_counter += 1;
             }
@@ -159,8 +158,8 @@ impl Box3 {
                 let c = (num_vertices + (ix + 1) + grid_x1 * (iy + 1)) as u32;
                 let d = (num_vertices + (ix + 1) + grid_x1 * iy) as u32;
 
-                obj.indices.extend_from_slice(&[a, b, d]);
-                obj.indices.extend_from_slice(&[b, c, d]);
+                geo.indices.extend_from_slice(&[a, b, d]);
+                geo.indices.extend_from_slice(&[b, c, d]);
             }
         }
 
@@ -168,35 +167,23 @@ impl Box3 {
     }
 }
 
-impl Object for Box3 {
-    fn get_object(
+impl Geometrical for Box3 {
+    fn get_geometry(
         &self
-    ) -> &Object3d {
-        &self.obj
+    ) -> &BufferGeometry {
+        &self.geo
     }
 
-    fn get_object_mut(
+    fn get_geometry_mut(
         &mut self
-    ) -> &mut Object3d {
-        &mut self.obj
+    ) -> &mut BufferGeometry {
+        &mut self.geo
     }
 
     fn drop(
         &mut self, 
         renderer: &crate::renderer::GlRenderer
     ) {
-        (self as &mut dyn Object).delete(renderer)
-    }
-}
-
-impl RenderableObject for Box3 {
-    fn render(
-        &mut self, 
-        world_matrix: Option<&Matrix4>,
-        renderer: &crate::renderer::GlRenderer
-    ) {
-        (self as &mut dyn RenderableObject).draw(
-            world_matrix, renderer
-        )
+        (self as &mut dyn Geometrical).destroy(renderer)
     }
 }

@@ -1,10 +1,10 @@
 use std::{mem::size_of, slice::from_raw_parts};
 use glow::*;
 use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer};
-use super::{RGB, Object};
+use super::{RGB, Object, Geometrical};
 
-pub trait RenderableObject
-    where Self: Object {
+pub trait Renderable
+    where Self: Object + Geometrical {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
@@ -12,22 +12,22 @@ pub trait RenderableObject
     );
 }
 
-impl dyn RenderableObject {
+impl dyn Renderable {
     unsafe fn upload(
         &mut self, 
         renderer: &GlRenderer
     ) {
-        if self.get_object().vbo.is_some() {
+        if self.get_geometry().vbo.is_some() {
             return;
         }
         
         let gl = &renderer.gl;
 
         {
-            let obj = self.get_object_mut();
-            obj.vbo = Some(gl.create_buffer().unwrap());
-            obj.ebo = Some(gl.create_buffer().unwrap());
-            obj.vao = Some(gl.create_vertex_array().unwrap());
+            let geo = self.get_geometry_mut();
+            geo.vbo = Some(gl.create_buffer().unwrap());
+            geo.ebo = Some(gl.create_buffer().unwrap());
+            geo.vao = Some(gl.create_vertex_array().unwrap());
         }
         
         // vbos
@@ -50,9 +50,9 @@ impl dyn RenderableObject {
         gl: &Context,
         attrib_locations: (u32, u32)
     ) {
-        let obj = self.get_object();
+        let geo = self.get_geometry();
 
-        gl.bind_vertex_array(obj.vao);
+        gl.bind_vertex_array(geo.vao);
         
         gl.vertex_attrib_pointer_f32(
             attrib_locations.0, 
@@ -69,7 +69,7 @@ impl dyn RenderableObject {
             FLOAT, 
             false, 
             size_of::<RGB>() as _, 
-            (size_of::<Vector3>() * obj.positions.len()) as _
+            (size_of::<Vector3>() * geo.positions.len()) as _
         );
     }
 
@@ -77,14 +77,14 @@ impl dyn RenderableObject {
         &self, 
         gl: &Context 
     ) {
-        let obj = self.get_object();
+        let geo = self.get_geometry();
 
         let indices = from_raw_parts(
-            obj.indices.as_ptr() as *const u8,
-            size_of::<u32>() * obj.indices.len()
+            geo.indices.as_ptr() as *const u8,
+            size_of::<u32>() * geo.indices.len()
         );
 
-        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, obj.ebo);
+        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, geo.ebo);
         gl.buffer_data_u8_slice(ELEMENT_ARRAY_BUFFER, indices, STATIC_DRAW);
     }
 
@@ -92,21 +92,21 @@ impl dyn RenderableObject {
         &self, 
         gl: &Context 
     ) {
-        let obj = self.get_object();
+        let geo = self.get_geometry();
 
-        let num_vertices = obj.positions.len();
+        let num_vertices = geo.positions.len();
         
         let positions = from_raw_parts(
-            obj.positions.as_ptr() as *const u8,
+            geo.positions.as_ptr() as *const u8,
             size_of::<Vector3>() * num_vertices
         );
 
         let colors = from_raw_parts(
-            obj.colors.as_ptr() as *const u8,
+            geo.colors.as_ptr() as *const u8,
             size_of::<RGB>() * num_vertices
         );
 
-        gl.bind_buffer(ARRAY_BUFFER, obj.vbo);
+        gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
         gl.buffer_data_size(ARRAY_BUFFER, (positions.len() + colors.len()) as _, STATIC_DRAW);
         gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, 0, positions);
         gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, positions.len() as _, colors);
@@ -116,15 +116,15 @@ impl dyn RenderableObject {
         &self,
         renderer: &GlRenderer
     ) {
-        let obj = self.get_object();
+        let geo = self.get_geometry();
         let gl = &renderer.gl;
 
-        gl.bind_vertex_array(obj.vao);
+        gl.bind_vertex_array(geo.vao);
         gl.enable_vertex_attrib_array(renderer.attrib_locations.0);
         gl.enable_vertex_attrib_array(renderer.attrib_locations.1);
 
-        gl.bind_buffer(ARRAY_BUFFER, obj.vbo);
-        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, obj.ebo);
+        gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
+        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, geo.ebo);
     }
 
     unsafe fn unbind(
@@ -184,11 +184,12 @@ impl dyn RenderableObject {
             self.bind(renderer);
             
             let obj = self.get_object();
+            let geo = self.get_geometry();
             let gl = &renderer.gl;
 
             gl.draw_elements(
-                obj.mode as _, 
-                obj.indices.len() as _, 
+                geo.mode as _, 
+                geo.indices.len() as _, 
                 UNSIGNED_INT, 
                 0
             );

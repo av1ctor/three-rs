@@ -1,10 +1,10 @@
 use std::{rc::Rc, cell::RefCell};
 use glow::*;
-use crate::{core::RenderableObject, renderer::GlRenderer, camera::PerspectiveCamera};
+use crate::{core::GeometricalRenderable, renderer::GlRenderer, camera::PerspectiveCamera};
 
 pub struct Scene {
     pub renderer: Rc<RefCell<GlRenderer>>,
-    pub objects: Vec<Rc<RefCell<dyn RenderableObject>>>,
+    pub objects: Vec<Rc<RefCell<dyn GeometricalRenderable>>>,
 }
 
 impl Drop for Scene {
@@ -31,7 +31,7 @@ impl Scene {
     pub fn add<T>(
         &mut self,
         obj: Rc<RefCell<T>>
-    ) where T: RenderableObject + 'static {
+    ) where T: GeometricalRenderable + 'static {
         self.objects.push(obj);
     }
 
