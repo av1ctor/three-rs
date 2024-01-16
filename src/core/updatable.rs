@@ -1,7 +1,7 @@
-use super::Objectifiable;
+use super::Object3d;
 
 pub trait Updatable 
-    where Self: Objectifiable {
+    where Self: Object3d {
     fn update_matrix(
         &mut self,
     ) {

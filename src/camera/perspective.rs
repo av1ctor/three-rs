@@ -1,9 +1,9 @@
 use std::f32::consts::PI;
 use crate::{
     math::Matrix4, 
-    core::{Objectifiable, Object3d, Updatable, Transformable}
+    core::{Object3d, ObjectData, Updatable, Transformable}
 };
-use super::{CameraData, Camera, ObjectifiableCamera};
+use super::{CameraData, Camera, ObjectCamera};
 
 pub struct PerspectiveCamera {
     pub(crate) cam: CameraData,
@@ -75,16 +75,16 @@ impl PerspectiveCamera {
     }
 }
 
-impl Objectifiable for PerspectiveCamera {
+impl Object3d for PerspectiveCamera {
     fn get_object(
         &self
-    ) -> &Object3d {
+    ) -> &ObjectData {
         &self.cam.obj
     }
 
     fn get_object_mut(
         &mut self
-    ) -> &mut Object3d {
+    ) -> &mut ObjectData {
         &mut self.cam.obj
     }
 }
@@ -115,5 +115,5 @@ impl Camera for PerspectiveCamera {
     }
 }
 
-impl ObjectifiableCamera for PerspectiveCamera {
+impl ObjectCamera for PerspectiveCamera {
 }

@@ -6,6 +6,6 @@ pub use camera::*;
 pub use perspective::*;
 pub use orthographic::*;
 
-use crate::core::{Objectifiable, Updatable};
+use crate::core::{Object3d, Updatable};
 
-pub trait ObjectifiableCamera: Objectifiable + Updatable + Camera {}
+pub trait ObjectCamera: Object3d + Updatable + Camera {}

@@ -1,8 +1,8 @@
 use crate::math::{Vector3, Matrix4, Euler, Matrix3, Quaternion};
-use super::Objectifiable;
+use super::Object3d;
 
 pub trait Transformable
-    where Self: Objectifiable {
+    where Self: Object3d {
     fn apply_matrix(
         &mut self,
         m: &Matrix4

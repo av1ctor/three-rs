@@ -8,7 +8,7 @@ use crate::math::{
 };
 use super::GeometricalRenderable;
 
-pub struct Object3d {
+pub struct ObjectData {
     pub visible: bool,
     
     pub(crate) children: Vec<Rc<RefCell<dyn GeometricalRenderable>>>,
@@ -28,7 +28,7 @@ pub struct Object3d {
     pub render_order: usize,
 }
 
-impl Clone for Object3d {
+impl Clone for ObjectData {
     fn clone(
         &self
     ) -> Self {
@@ -50,7 +50,7 @@ impl Clone for Object3d {
     }
 }
 
-impl Object3d {
+impl ObjectData {
     pub fn new(
 ) -> Self {
         Self { 
@@ -279,5 +279,22 @@ impl Object3d {
         self.scale = s;
         self.dirt = true;
         self
+    }
+}
+
+pub trait Object3d {
+    fn get_object(
+        &self
+    ) -> &ObjectData;
+
+    fn get_object_mut(
+        &mut self
+    ) -> &mut ObjectData;
+
+    fn add(
+        &mut self,
+        child: Rc<RefCell<dyn GeometricalRenderable>>
+    ) {
+        self.get_object_mut().add(child);
     }
 }

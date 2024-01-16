@@ -3,7 +3,7 @@ use glow::*;
 use crate::{
     core::GeometricalRenderable, 
     renderer::GlRenderer, 
-    camera::ObjectifiableCamera,
+    camera::ObjectCamera,
 };
 
 pub struct Scene {
@@ -41,7 +41,7 @@ impl Scene {
 
     pub fn render(
         &mut self,
-        camera: &mut dyn ObjectifiableCamera
+        camera: &mut dyn ObjectCamera
     ) {
         camera.update_matrix();
         

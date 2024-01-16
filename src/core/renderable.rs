@@ -3,16 +3,16 @@ use glow::*;
 use crate::{
     math::{vector3::Vector3, Matrix4}, 
     renderer::GlRenderer, 
-    camera::ObjectifiableCamera
+    camera::ObjectCamera
 };
-use super::{RGB, Objectifiable, Geometrical};
+use super::{RGB, Object3d, Geometrical};
 
 pub trait Renderable
-    where Self: Objectifiable + Geometrical {
+    where Self: Object3d + Geometrical {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
-        camera: &dyn ObjectifiableCamera,
+        camera: &dyn ObjectCamera,
         renderer: &GlRenderer
     );
 }
@@ -149,7 +149,7 @@ impl dyn Renderable {
     unsafe fn update(
         &mut self,
         world_matrix: Option<&Matrix4>,
-        camera: &dyn ObjectifiableCamera,
+        camera: &dyn ObjectCamera,
         renderer: &GlRenderer
     ) -> bool {
         self.upload(renderer);
@@ -185,7 +185,7 @@ impl dyn Renderable {
     pub fn draw(
         &mut self,
         world_matrix: Option<&Matrix4>,
-        camera: &dyn ObjectifiableCamera,
+        camera: &dyn ObjectCamera,
         renderer: &GlRenderer
     ) {
         unsafe {

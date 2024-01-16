@@ -2,9 +2,9 @@ use std::{rc::Rc, cell::RefCell};
 
 use crate::{
     core::{
-        Object3d, 
+        ObjectData, 
         BufferGeometry, 
-        Objectifiable, 
+        Object3d, 
         Geometrical, 
         Renderable, 
         GeometricalRenderable, 
@@ -12,11 +12,11 @@ use crate::{
     }, 
     renderer::GlRenderer, 
     math::Matrix4, 
-    camera::ObjectifiableCamera
+    camera::ObjectCamera
 };
 
 pub struct Mesh {
-    obj: Object3d,
+    obj: ObjectData,
     geo: BufferGeometry,
 }
 
@@ -25,22 +25,22 @@ impl Mesh {
         geo: &dyn Geometrical
     ) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
-            obj: Object3d::new(),
+            obj: ObjectData::new(),
             geo: geo.get_geometry().clone(),
         }))
     }
 }
 
-impl Objectifiable for Mesh {
+impl Object3d for Mesh {
     fn get_object(
         &self
-    ) -> &Object3d {
+    ) -> &ObjectData {
         &self.obj
     }
 
     fn get_object_mut(
         &mut self
-    ) -> &mut Object3d {
+    ) -> &mut ObjectData {
         &mut self.obj
     }
 }
@@ -70,7 +70,7 @@ impl Renderable for Mesh {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
-        camera: &dyn ObjectifiableCamera,
+        camera: &dyn ObjectCamera,
         renderer: &GlRenderer
     ) {
         (self as &mut dyn Renderable).draw(

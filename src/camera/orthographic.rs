@@ -1,8 +1,8 @@
 use crate::{
     math::Matrix4, 
-    core::{Objectifiable, Object3d, Updatable, Transformable}
+    core::{Object3d, ObjectData, Updatable, Transformable}
 };
-use super::{CameraData, ObjectifiableCamera, Camera};
+use super::{CameraData, ObjectCamera, Camera};
 
 pub struct OrthographicCamera {
     pub(crate) cam: CameraData,
@@ -61,16 +61,16 @@ impl OrthographicCamera {
     }
 }
 
-impl Objectifiable for OrthographicCamera {
+impl Object3d for OrthographicCamera {
     fn get_object(
         &self
-    ) -> &Object3d {
+    ) -> &ObjectData {
         &self.cam.obj
     }
 
     fn get_object_mut(
         &mut self
-    ) -> &mut Object3d {
+    ) -> &mut ObjectData {
         &mut self.cam.obj
     }
 }
@@ -101,5 +101,5 @@ impl Camera for OrthographicCamera {
     }
 }
 
-impl ObjectifiableCamera for OrthographicCamera {
+impl ObjectCamera for OrthographicCamera {
 }
