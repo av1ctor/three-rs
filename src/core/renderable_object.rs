@@ -1,22 +1,10 @@
 use std::{mem::size_of, slice::from_raw_parts};
 use glow::*;
 use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer};
-use super::{Object3d, RGB};
+use super::{RGB, Object};
 
-pub trait RenderableObject {
-    fn get_object(
-        &self
-    ) -> &Object3d;
-
-    fn get_object_mut(
-        &mut self
-    ) -> &mut Object3d;
-
-    fn drop(
-        &mut self, 
-        renderer: &GlRenderer
-    );
-
+pub trait RenderableObject
+    where Self: Object {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
@@ -219,26 +207,6 @@ impl dyn RenderableObject {
                     world_matrix,
                     renderer
                 );
-            }
-        }
-    }
-
-    pub fn delete(
-        &mut self, 
-        renderer: &GlRenderer
-    ) {
-        unsafe {
-            let obj = self.get_object();
-            let gl = &renderer.gl;
-
-            if let Some(vao) = obj.vao {
-                gl.delete_vertex_array(vao);
-            }
-            if let Some(ebo) = obj.ebo {
-                gl.delete_buffer(ebo);
-            }
-            if let Some(vbo) = obj.vbo {
-                gl.delete_buffer(vbo);
             }
         }
     }

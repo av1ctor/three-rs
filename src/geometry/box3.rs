@@ -1,6 +1,6 @@
 use std::{rc::Rc, cell::RefCell};
 use glow::TRIANGLES;
-use crate::{core::{Object3d, RenderableObject}, math::{Vector3, Matrix4}};
+use crate::{core::{Object3d, RenderableObject, Object}, math::{Vector3, Matrix4}};
 
 #[derive(Clone)]
 pub struct Box3 {
@@ -168,7 +168,7 @@ impl Box3 {
     }
 }
 
-impl RenderableObject for Box3 {
+impl Object for Box3 {
     fn get_object(
         &self
     ) -> &Object3d {
@@ -185,9 +185,11 @@ impl RenderableObject for Box3 {
         &mut self, 
         renderer: &crate::renderer::GlRenderer
     ) {
-        (self as &mut dyn RenderableObject).delete(renderer)
+        (self as &mut dyn Object).delete(renderer)
     }
+}
 
+impl RenderableObject for Box3 {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
