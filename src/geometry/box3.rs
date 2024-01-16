@@ -21,17 +21,14 @@ impl Box3 {
         height_segs: usize,
         depth_segs: usize
     ) -> Self {
-        let mut geo = BufferGeometry::new(
-            TRIANGLES, 
-            vec![], 
-            vec![], 
-            vec![]
-        );
 
         let mut num_vertices = 0;
+        let mut indices = vec![];
+        let mut positions = vec![];
 
         num_vertices += Self::build_plane(
-            &mut geo, 
+            &mut indices, 
+            &mut positions,
             Coords::ZYX, 
             -1.0, -1.0, 
             depth, height, width, 
@@ -40,7 +37,8 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut geo, 
+            &mut indices, 
+            &mut positions,
             Coords::ZYX, 
             1.0, -1.0, 
             depth, height, -width, 
@@ -49,7 +47,8 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut geo, 
+            &mut indices, 
+            &mut positions,
             Coords::XZY, 
             1.0, 1.0, 
             width, depth, height, 
@@ -58,7 +57,8 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut geo, 
+            &mut indices, 
+            &mut positions,
             Coords::XZY, 
             1.0, -1.0, 
             width, depth, -height, 
@@ -67,7 +67,8 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut geo, 
+            &mut indices, 
+            &mut positions,
             Coords::XYZ, 
             1.0, -1.0, 
             width, height, depth, 
@@ -76,7 +77,8 @@ impl Box3 {
         );
 
         num_vertices += Self::build_plane(
-            &mut geo, 
+            &mut indices, 
+            &mut positions,
             Coords::XYZ, 
             -1.0, -1.0, 
             width, height, -depth, 
@@ -84,20 +86,27 @@ impl Box3 {
             num_vertices
         );
 
+        let mut colors = vec![];
         let mut color = 0.0;
         let inc = 1.0 / num_vertices as f32;
         for _ in 0..num_vertices {
             color += inc;
-            geo.colors.push([0.0, 0.0, color]);
+            colors.push([0.0, 0.0, color]);
         }
         
         Self {
-            geo
+            geo: BufferGeometry::new(
+                TRIANGLES, 
+                Some(indices), 
+                Some(positions), 
+                Some(colors),
+            )
         }
     }
 
     fn build_plane(
-        geo: &mut BufferGeometry, 
+        indices: &mut Vec<u32>, 
+        positions: &mut Vec<Vector3>, 
         coords: Coords, 
         udir: f32, 
         vdir: f32, 
@@ -145,7 +154,7 @@ impl Box3 {
                     },
                 }
 
-                geo.positions.push(vector);
+                positions.push(vector);
 
                 vertex_counter += 1;
             }
@@ -158,8 +167,8 @@ impl Box3 {
                 let c = (num_vertices + (ix + 1) + grid_x1 * (iy + 1)) as u32;
                 let d = (num_vertices + (ix + 1) + grid_x1 * iy) as u32;
 
-                geo.indices.extend_from_slice(&[a, b, d]);
-                geo.indices.extend_from_slice(&[b, c, d]);
+                indices.extend_from_slice(&[a, b, d]);
+                indices.extend_from_slice(&[b, c, d]);
             }
         }
 

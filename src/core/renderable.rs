@@ -57,25 +57,35 @@ impl dyn Renderable {
     ) {
         let geo = self.get_geometry();
 
-        gl.bind_vertex_array(geo.vao);
+        let sizes = geo.get_sizes();
+        let mut offset = 0;
         
-        gl.vertex_attrib_pointer_f32(
-            attrib_locations.0, 
-            3, 
-            FLOAT, 
-            false, 
-            size_of::<Vector3>() as _, 
-            0
-        );
+        if sizes.total > 0 {
+            gl.bind_vertex_array(geo.vao);
 
-        gl.vertex_attrib_pointer_f32(
-            attrib_locations.1, 
-            3, 
-            FLOAT, 
-            false, 
-            size_of::<RGB>() as _, 
-            (size_of::<Vector3>() * geo.positions.len()) as _
-        );
+            if sizes.positions > 0 {
+                gl.vertex_attrib_pointer_f32(
+                    attrib_locations.0, 
+                    3, 
+                    FLOAT, 
+                    false, 
+                    size_of::<Vector3>() as _, 
+                    offset as _
+                );
+                offset += sizes.positions;
+            }
+
+            if sizes.colors > 0 {
+                gl.vertex_attrib_pointer_f32(
+                    attrib_locations.1, 
+                    3, 
+                    FLOAT, 
+                    false, 
+                    size_of::<RGB>() as _, 
+                    offset as _
+                );
+            }
+        }
     }
 
     unsafe fn upload_indices(
@@ -84,13 +94,15 @@ impl dyn Renderable {
     ) {
         let geo = self.get_geometry();
 
-        let indices = from_raw_parts(
-            geo.indices.as_ptr() as *const u8,
-            size_of::<u32>() * geo.indices.len()
-        );
-
-        gl.bind_buffer(ELEMENT_ARRAY_BUFFER, geo.ebo);
-        gl.buffer_data_u8_slice(ELEMENT_ARRAY_BUFFER, indices, STATIC_DRAW);
+        if let Some(indices) = &geo.indices {
+            let buffer = from_raw_parts(
+                indices.as_ptr() as *const u8,
+                size_of::<u32>() * indices.len()
+            );
+            
+            gl.bind_buffer(ELEMENT_ARRAY_BUFFER, geo.ebo);
+            gl.buffer_data_u8_slice(ELEMENT_ARRAY_BUFFER, buffer, STATIC_DRAW);
+        }
     }
 
     unsafe fn upload_vertices(
@@ -99,22 +111,32 @@ impl dyn Renderable {
     ) {
         let geo = self.get_geometry();
 
-        let num_vertices = geo.positions.len();
+        let sizes = geo.get_sizes();
+        let mut offset = 0;
         
-        let positions = from_raw_parts(
-            geo.positions.as_ptr() as *const u8,
-            size_of::<Vector3>() * num_vertices
-        );
+        if sizes.total > 0 {
+            gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
+            gl.buffer_data_size(ARRAY_BUFFER, sizes.total as _, STATIC_DRAW);
+            
+            if let Some(positions) = &geo.positions { 
+                let buffer = from_raw_parts(
+                    positions.as_ptr() as *const u8,
+                    sizes.positions
+                );
+                gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, offset as _, buffer);
+                offset += sizes.positions;
+            }
 
-        let colors = from_raw_parts(
-            geo.colors.as_ptr() as *const u8,
-            size_of::<RGB>() * num_vertices
-        );
+            if let Some(colors) = &geo.colors { 
+                let buffer = from_raw_parts(
+                    colors.as_ptr() as *const u8,
+                    sizes.colors
+                );
 
-        gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
-        gl.buffer_data_size(ARRAY_BUFFER, (positions.len() + colors.len()) as _, STATIC_DRAW);
-        gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, 0, positions);
-        gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, positions.len() as _, colors);
+                gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, offset as _, buffer);
+                //offset += sizes.colors;
+            }
+        }
     }
 
     unsafe fn bind(
@@ -199,12 +221,14 @@ impl dyn Renderable {
             let geo = self.get_geometry();
             let gl = &renderer.gl;
 
-            gl.draw_elements(
-                geo.mode as _, 
-                geo.indices.len() as _, 
-                UNSIGNED_INT, 
-                0
-            );
+            if let Some(indices) = &geo.indices {
+                gl.draw_elements(
+                    geo.mode as _, 
+                    indices.len() as _, 
+                    UNSIGNED_INT, 
+                    0
+                );
+            }
 
             self.unbind(renderer);
 

@@ -1,12 +1,20 @@
+use std::mem::size_of;
+
 use glow::{NativeBuffer, NativeVertexArray};
 use crate::math::Vector3;
 use super::RGB;
 
+pub struct BufferGeometrySizes {
+    pub positions: usize,
+    pub colors: usize,
+    pub total: usize,
+}
+
 pub struct BufferGeometry {
     pub(crate) mode: u32,
-    pub(crate) indices: Vec<u32>,
-    pub(crate) positions: Vec<Vector3>,
-    pub(crate) colors: Vec<RGB>,
+    pub(crate) indices: Option<Vec<u32>>,
+    pub(crate) positions: Option<Vec<Vector3>>,
+    pub(crate) colors: Option<Vec<RGB>>,
     
     pub(crate) vbo: Option<NativeBuffer>,
     pub(crate) ebo: Option<NativeBuffer>,
@@ -16,9 +24,9 @@ pub struct BufferGeometry {
 impl BufferGeometry {
     pub fn new(
         mode: u32,
-        indices: Vec<u32>,
-        positions: Vec<Vector3>,
-        colors: Vec<RGB>,
+        indices: Option<Vec<u32>>,
+        positions: Option<Vec<Vector3>>,
+        colors: Option<Vec<RGB>>,
 ) -> Self {
         Self { 
             mode,
@@ -29,6 +37,29 @@ impl BufferGeometry {
             ebo: None,
             vao: None,
         }
+    }
+
+    pub fn get_sizes(
+        &self
+    ) -> BufferGeometrySizes {
+        
+        let mut sizes = BufferGeometrySizes {
+            positions: 0,
+            colors: 0,
+            total: 0,
+        };
+
+        if let Some(positions) = &self.positions {
+            sizes.positions = positions.len() * size_of::<Vector3>();
+            sizes.total += sizes.positions;
+        }
+
+        if let Some(colors) = &self.colors {
+            sizes.colors = colors.len() * size_of::<RGB>();
+            sizes.total += sizes.colors;
+        }
+
+        sizes
     }
 }
 
