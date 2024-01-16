@@ -1,6 +1,6 @@
 use std::{mem::size_of, slice::from_raw_parts};
 use glow::*;
-use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer};
+use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer, camera::PerspectiveCamera};
 use super::{RGB, Objectifiable, Geometrical};
 
 pub trait Renderable
@@ -8,6 +8,7 @@ pub trait Renderable
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
+        camera: &PerspectiveCamera,
         renderer: &GlRenderer
     );
 }
@@ -144,6 +145,7 @@ impl dyn Renderable {
     unsafe fn update(
         &mut self,
         world_matrix: Option<&Matrix4>,
+        camera: &PerspectiveCamera,
         renderer: &GlRenderer
     ) -> bool {
         self.upload(renderer);
@@ -163,12 +165,14 @@ impl dyn Renderable {
             }
         }
 
+        let model_view_matrix = camera.cam.world_matrix_inverse.mul(&obj.world_matrix);
+
         let gl = &renderer.gl;
 
         gl.uniform_matrix_4_f32_slice(
             Some(&renderer.uniform_locations.model_view), 
             false, 
-            obj.world_matrix.to_slice()
+            model_view_matrix.to_slice()
         );
 
         updated
@@ -177,10 +181,14 @@ impl dyn Renderable {
     pub fn draw(
         &mut self,
         world_matrix: Option<&Matrix4>,
+        camera: &PerspectiveCamera,
         renderer: &GlRenderer
     ) {
         unsafe {
-            let updated = self.update(world_matrix, renderer);
+            let updated = self.update(
+                world_matrix, camera, 
+                renderer
+            );
             self.bind(renderer);
             
             let obj = self.get_object();
@@ -206,6 +214,7 @@ impl dyn Renderable {
             for child in &obj.children {
                 child.borrow_mut().render(
                     world_matrix,
+                    camera,
                     renderer
                 );
             }

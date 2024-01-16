@@ -10,7 +10,7 @@ use crate::{
         GeometricalRenderable, 
         Transformable
     }, 
-    renderer::GlRenderer, math::Matrix4
+    renderer::GlRenderer, math::Matrix4, camera::PerspectiveCamera
 };
 
 pub struct Mesh {
@@ -68,9 +68,14 @@ impl Renderable for Mesh {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
+        camera: &PerspectiveCamera,
         renderer: &GlRenderer
     ) {
-        (self as &mut dyn Renderable).draw(world_matrix, renderer)
+        (self as &mut dyn Renderable).draw(
+            world_matrix, 
+            camera,
+            renderer
+        )
     }
 }
 

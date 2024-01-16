@@ -1,11 +1,9 @@
 use std::f32::consts::PI;
-
-use crate::math::Matrix4;
-
+use crate::{math::Matrix4, core::{Objectifiable, Object3d, Transformable}};
 use super::Camera;
 
 pub struct PerspectiveCamera {
-    pub camera: Camera,
+    pub(crate) cam: Camera,
     pub fov: f32,
     pub zoom: f32,
     pub near: f32,
@@ -24,7 +22,7 @@ impl PerspectiveCamera {
         far: f32
     ) -> Self {
         let mut cam = Self {
-            camera: Camera::new(),
+            cam: Camera::new(),
             fov,
             zoom: 1.0,
             near,
@@ -66,10 +64,33 @@ impl PerspectiveCamera {
             left += near * skew / self.get_film_width();
         };
 
-        self.camera.proj_matrix = Matrix4::perspective(
+        self.cam.proj_matrix = Matrix4::perspective(
             left, left + width, top, top - height, near, self.far
         );
 
-		self.camera.proj_matrix_inverse = self.camera.proj_matrix.invert();
+		self.cam.proj_matrix_inverse = self.cam.proj_matrix.invert();
+    }
+}
+
+impl Objectifiable for PerspectiveCamera {
+    fn get_object(
+        &self
+    ) -> &Object3d {
+        &self.cam.obj
+    }
+
+    fn get_object_mut(
+        &mut self
+    ) -> &mut Object3d {
+        &mut self.cam.obj
+    }
+}
+
+impl Transformable for PerspectiveCamera {
+    fn update_matrix(
+        &mut self,
+    ) {
+        self.cam.obj.update_matrix();
+        self.cam.world_matrix_inverse = self.cam.obj.matrix.invert();
     }
 }

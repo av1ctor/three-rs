@@ -3,6 +3,12 @@ use super::Objectifiable;
 
 pub trait Transformable
     where Self: Objectifiable {
+    fn update_matrix(
+        &mut self,
+    ) {
+        self.get_object_mut().update_matrix();
+    }
+    
     fn apply_matrix(
         &mut self,
         m: &Matrix4
@@ -116,5 +122,11 @@ pub trait Transformable
     ) -> &mut Self {
         self.get_object_mut().scale(s);
         self
+    }
+
+    fn on_matrix_updated(
+        &mut self,
+        _matrix: &Matrix4
+    ) {
     }
 }
