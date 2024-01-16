@@ -46,7 +46,7 @@ impl Scene {
             gl.uniform_matrix_4_f32_slice(
                 Some(&renderer.uniform_locations.projection), 
                 false, 
-                camera.camera.projection_matrix.to_slice()
+                camera.camera.proj_matrix.to_slice()
             );
     
             renderer.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);

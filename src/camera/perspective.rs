@@ -66,10 +66,10 @@ impl PerspectiveCamera {
             left += near * skew / self.get_film_width();
         };
 
-        self.camera.projection_matrix = Matrix4::perspective(
+        self.camera.proj_matrix = Matrix4::perspective(
             left, left + width, top, top - height, near, self.far
         );
 
-		self.camera.projection_matrix_inverse = self.camera.projection_matrix.invert();
+		self.camera.proj_matrix_inverse = self.camera.proj_matrix.invert();
     }
 }

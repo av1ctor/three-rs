@@ -271,4 +271,13 @@ impl Object3d {
         self.dirt = true;
         self
     }
+
+    pub fn scale(
+        &mut self,
+        s: Vector3
+    ) -> &mut Self {
+        self.scale = s;
+        self.dirt = true;
+        self
+    }
 }

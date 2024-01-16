@@ -1,13 +1,21 @@
 use std::{rc::Rc, cell::RefCell};
 
 use crate::{
-    core::{Object3d, BufferGeometry, Objectifiable, Geometrical, Renderable, GeometricalRenderable}, 
+    core::{
+        Object3d, 
+        BufferGeometry, 
+        Objectifiable, 
+        Geometrical, 
+        Renderable, 
+        GeometricalRenderable, 
+        Transformable
+    }, 
     renderer::GlRenderer, math::Matrix4
 };
 
 pub struct Mesh {
-    pub obj: Object3d,
-    pub geo: BufferGeometry,
+    obj: Object3d,
+    geo: BufferGeometry,
 }
 
 impl Mesh {
@@ -67,5 +75,7 @@ impl Renderable for Mesh {
 }
 
 impl GeometricalRenderable for Mesh {
+}
 
+impl Transformable for Mesh {
 }
