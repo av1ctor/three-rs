@@ -1,6 +1,6 @@
 use super::Object3d;
 
-pub trait Object {
+pub trait Objectifiable {
     fn get_object(
         &self
     ) -> &Object3d;

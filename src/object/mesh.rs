@@ -1,7 +1,7 @@
 use std::{rc::Rc, cell::RefCell};
 
 use crate::{
-    core::{Object3d, BufferGeometry, Object, Geometrical, Renderable, GeometricalRenderable}, 
+    core::{Object3d, BufferGeometry, Objectifiable, Geometrical, Renderable, GeometricalRenderable}, 
     renderer::GlRenderer, math::Matrix4
 };
 
@@ -16,12 +16,12 @@ impl Mesh {
     ) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
             obj: Object3d::new(),
-            geo: geo.get_geometry().to_owned(),
+            geo: geo.get_geometry().clone(),
         }))
     }
 }
 
-impl Object for Mesh {
+impl Objectifiable for Mesh {
     fn get_object(
         &self
     ) -> &Object3d {

@@ -1,10 +1,10 @@
 use std::{mem::size_of, slice::from_raw_parts};
 use glow::*;
 use crate::{math::{vector3::Vector3, Matrix4}, renderer::GlRenderer};
-use super::{RGB, Object, Geometrical};
+use super::{RGB, Objectifiable, Geometrical};
 
 pub trait Renderable
-    where Self: Object + Geometrical {
+    where Self: Objectifiable + Geometrical {
     fn render(
         &mut self, 
         world_matrix: Option<&Matrix4>,
