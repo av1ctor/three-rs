@@ -159,7 +159,7 @@ impl Matrix4 {
         let b13 = b[ 8]; let b23 = b[ 9]; let b33 = b[10]; let b43 = b[11];
         let b14 = b[12]; let b24 = b[13]; let b34 = b[14]; let b44 = b[15];
 
-		let e = [
+		Self([
             a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41,
             a21 * b11 + a22 * b21 + a23 * b31 + a24 * b41,
             a31 * b11 + a32 * b21 + a33 * b31 + a34 * b41,
@@ -179,54 +179,65 @@ impl Matrix4 {
             a21 * b14 + a22 * b24 + a23 * b34 + a24 * b44,
             a31 * b14 + a32 * b24 + a33 * b34 + a34 * b44,
             a41 * b14 + a42 * b24 + a43 * b34 + a44 * b44
-        ];
-
-        Self(e)
+        ])
     }
 
     pub fn mul_scalar(
         &self, 
         v: f32
     ) -> Self {
-        let mut e = [0f32; 4*4];
         let s = &self.0;
         
-        e[ 0] = s[ 0] * v; e[ 1] = s[ 1] * v; e[ 2] = s[ 2] * v; e[ 3] = s[ 3] * v;
-        e[ 4] = s[ 4] * v; e[ 5] = s[ 5] * v; e[ 6] = s[ 6] * v; e[ 7] = s[ 7] * v;
-        e[ 8] = s[ 8] * v; e[ 9] = s[ 9] * v; e[10] = s[10] * v; e[11] = s[11] * v;
-        e[12] = s[12] * v; e[13] = s[13] * v; e[14] = s[14] * v; e[15] = s[15] * v;
-
-        Self(e)
+        Self([
+            s[ 0] * v, 
+            s[ 1] * v, 
+            s[ 2] * v, 
+            s[ 3] * v,
+            
+            s[ 4] * v, 
+            s[ 5] * v, 
+            s[ 6] * v, 
+            s[ 7] * v,
+            
+            s[ 8] * v, 
+            s[ 9] * v, 
+            s[10] * v, 
+            s[11] * v,
+            
+            s[12] * v, 
+            s[13] * v, 
+            s[14] * v, 
+            s[15] * v
+        ])
     }
 
     pub fn mul_vector(
         &self, 
         v: &Vector3
     ) -> Self {
-        let mut e = [0f32; 4*4];
         let s = &self.0;
         
-        e[ 0] = s[ 0] * v.x;
-		e[ 1] = s[ 1] * v.y;
-		e[ 2] = s[ 2] * v.z;
-        e[ 3] = s[ 3];
-		
-        e[ 4] = s[ 4] * v.x;
-		e[ 5] = s[ 5] * v.y;
-		e[ 6] = s[ 6] * v.z;
-        e[ 7] = s[ 7];
-
-        e[ 8] = s[ 8] * v.x;
-		e[ 9] = s[ 9] * v.y;
-		e[10] = s[10] * v.z;
-        e[11] = s[11];
-
-        e[12] = s[12] * v.x;
-		e[13] = s[13] * v.y;
-		e[14] = s[14] * v.z;
-        e[15] = s[15];
-
-        Self(e)
+        Self([
+            s[ 0] * v.x,
+            s[ 1] * v.y,
+            s[ 2] * v.z,
+            s[ 3],
+            
+            s[ 4] * v.x,
+            s[ 5] * v.y,
+            s[ 6] * v.z,
+            s[ 7],
+    
+            s[ 8] * v.x,
+            s[ 9] * v.y,
+            s[10] * v.z,
+            s[11],
+    
+            s[12] * v.x,
+            s[13] * v.y,
+            s[14] * v.z,
+            s[15]
+        ])
     }
 
     pub fn determinant(
@@ -379,29 +390,27 @@ impl Matrix4 {
         let wy = w * y2;
         let wz = w * z2;
 
-        let mut e = [0f32; 4*4];
-        
-        e[ 0] = (1.0 - (yy + zz)) * s.x;
-		e[ 1] = (xy + wz) * s.x;
-		e[ 2] = (xz - wy) * s.x;
-		e[ 3] = 0.0;
-		
-        e[ 4] = (xy - wz) * s.y;
-		e[ 5] = (1.0 - (xx + zz)) * s.y;
-		e[ 6] = (yz + wx) * s.y;
-		e[ 7] = 0.0;
-		
-        e[ 8] = (xz + wy) * s.z;
-		e[ 9] = (yz - wx) * s.z;
-		e[10] = (1.0 - ( xx + yy )) * s.z;
-		e[11] = 0.0;
-
-		e[12] = pos.x;
-		e[13] = pos.y;
-		e[14] = pos.z;
-		e[15] = 1.0;
-
-        Self(e)
+        Self([
+            (1.0 - (yy + zz)) * s.x,
+            (xy + wz) * s.x,
+            (xz - wy) * s.x,
+            0.0,
+            
+            (xy - wz) * s.y,
+            (1.0 - (xx + zz)) * s.y,
+            (yz + wx) * s.y,
+            0.0,
+            
+            (xz + wy) * s.z,
+            (yz - wx) * s.z,
+            (1.0 - ( xx + yy )) * s.z,
+            0.0,
+    
+            pos.x,
+            pos.y,
+            pos.z,
+            1.0
+        ])
     }
 
     pub fn decompose(
@@ -410,8 +419,8 @@ impl Matrix4 {
         let e = &self.0;
 
         let mut sx = Vector3::new(e[ 0], e[ 1], e[ 2]).length();
-		let sy = Vector3::new(e[ 4], e[ 5], e[ 6]).length();
-		let sz = Vector3::new(e[ 8], e[ 9], e[10]).length();
+		let     sy = Vector3::new(e[ 4], e[ 5], e[ 6]).length();
+		let     sz = Vector3::new(e[ 8], e[ 9], e[10]).length();
 
 		let det = self.determinant();
 		if det < 0.0 {
