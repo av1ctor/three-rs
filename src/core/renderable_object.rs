@@ -208,7 +208,7 @@ impl dyn RenderableObject {
             self.unbind(renderer);
 
             let world_matrix = if updated {
-                Some(&obj.matrix)
+                Some(&obj.world_matrix)
             } 
             else {
                 None
