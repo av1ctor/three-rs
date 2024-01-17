@@ -56,15 +56,8 @@ impl Scene {
         camera.update_matrix();
         
         let renderer = &self.renderer.borrow_mut();
-        let gl = &renderer.gl;
         
         unsafe {
-            gl.uniform_matrix_4_f32_slice(
-                Some(&renderer.uniform_locations.projection), 
-                false, 
-                camera.get_data().proj_matrix.to_slice()
-            );
-    
             renderer.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
 
             for object in &mut self.objects {

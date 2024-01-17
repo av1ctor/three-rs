@@ -1,22 +1,67 @@
+use std::collections::HashMap;
 use glow::*;
 use crate::math::Matrix4;
 
-const VERTEX_SHADER_SOURCE: &str = include_str!("../shaders/vertex.glsl");
-const FRAGMENT_SHADER_SOURCE: &str = include_str!("../shaders/frag.glsl");
-
-pub struct ShaderUniformLocations {
-    pub projection: UniformLocation,
-    pub model_view: UniformLocation,
+pub enum Event {
+    Quit,
+    KeyDown(usize),
 }
 
-pub struct GlRenderer {
-    pub gl: Context,
-    pub window: sdl2::video::Window,
-    pub events_loop: sdl2::EventPump,
-    pub context: sdl2::video::GLContext,
-    pub attrib_locations: (u32, u32),
-    pub uniform_locations: ShaderUniformLocations,
+#[derive(Clone, Debug)]
+#[repr(C)]
+#[allow(dead_code)]
+pub(crate) enum ShaderUniformType {
+    Vector3,
+    Matrix4,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ShaderUniform {
+    pub ty: ShaderUniformType,
+    pub location: UniformLocation,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ShaderUniformLocations {
+    pub projection: UniformLocation,
+    pub model_view: UniformLocation,
+    pub other: HashMap<String, ShaderUniform>,
+}
+
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum ShaderProgramType {
+    PosOnly = 0,
+    PosAndColor,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ShaderProgram {
     pub program: NativeProgram,
+    pub uniform_locations: ShaderUniformLocations,
+}
+
+const SHADER_SOURCES: &[(ShaderProgramType, &str, &str, &[(&str, ShaderUniformType)])] = &[
+    (
+        ShaderProgramType::PosOnly,
+        include_str!("../shaders/pos/vertex.glsl"), 
+        include_str!("../shaders/pos/frag.glsl"),
+        &[("color", ShaderUniformType::Vector3)],
+    ),
+    (
+        ShaderProgramType::PosAndColor,
+        include_str!("../shaders/pos_color/vertex.glsl"), 
+        include_str!("../shaders/pos_color/frag.glsl"),
+        &[],
+    )
+];
+
+pub struct GlRenderer {
+    pub(crate) gl: Context,
+    pub(crate) window: sdl2::video::Window,
+    pub(crate) events_loop: sdl2::EventPump,
+    pub(crate) _context: sdl2::video::GLContext,
+    pub(crate) programs: HashMap<ShaderProgramType, ShaderProgram>,
 }
 
 impl Drop for GlRenderer {
@@ -26,7 +71,9 @@ impl Drop for GlRenderer {
         unsafe {
             let gl = &self.gl;
             
-            gl.delete_program(self.program);
+            for program in self.programs.values() {
+                gl.delete_program(program.program);
+            }
         }
     }
 }
@@ -50,34 +97,60 @@ impl GlRenderer {
             .resizable()
             .build()
             .unwrap();
-        let context = window.gl_create_context().unwrap();
+        
+        // NOTE: if removed the GL initialization will crash
+        let _context = window.gl_create_context().unwrap();
+        
         let gl =
             Context::from_loader_function(|s| video.gl_get_proc_address(s) as *const _);
         
         let events_loop = sdl.event_pump().unwrap();
 
-        let program = Self::create_program(&gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
-        gl.use_program(Some(program));
+        Self::configure_gl(&gl, w, h);
 
-        let attrib_locations = (0, 1);
+        let mut programs = HashMap::default();
 
-        let uniform_locations = Self::configure_gl(&gl, w, h, &program);
+        for source in SHADER_SOURCES {
+            let program = Self::create_program(&gl, source.1, source.2);
+            let uniform_locations = Self::get_uniform_locations(
+                &gl, &program, source.3
+            );
+            programs.insert(
+                source.0.clone(), 
+                ShaderProgram{
+                    program,
+                    uniform_locations,
+                }
+            );
+        }
 
         Self {
             gl,
             window,
             events_loop,
-            context,
-            attrib_locations,
-            uniform_locations,
-            program
+            _context,
+            programs
         }
     }
 
     pub fn poll_events(
         &mut self
-    ) -> sdl2::event::EventPollIterator {
-        self.events_loop.poll_iter()
+    ) -> Vec<Event> {
+        let mut events = vec![];
+        
+        for event in self.events_loop.poll_iter() {
+            match event {
+                sdl2::event::Event::Quit { .. } => {
+                    events.push(Event::Quit);
+                },
+                sdl2::event::Event::KeyDown {scancode: Some(scancode), ..} => {
+                    events.push(Event::KeyDown(scancode as _));
+                }
+                _ => {}
+            }
+        }
+        
+        events
     }
 
     unsafe fn create_program(
@@ -120,31 +193,48 @@ impl GlRenderer {
         program
     }
 
-    unsafe fn configure_gl(
+    unsafe fn get_uniform_locations(
         gl: &Context,
-        w: u32,
-        h: u32,
-        program: &NativeProgram
-    ) -> ShaderUniformLocations {
-        let projection_loc = gl.get_uniform_location(*program, "projection").unwrap();
-        let model_view_loc = gl.get_uniform_location(*program, "model_view").unwrap();
+        program: &NativeProgram,
+        uniforms: &[(&str, ShaderUniformType)]
 
+    ) -> ShaderUniformLocations {
+        // find uniforms present in all shaders
+        let projection_loc = gl.get_uniform_location(*program, "projection").unwrap();
         let proj = Matrix4::identity();
         gl.uniform_matrix_4_f32_slice(Some(&projection_loc), false, proj.to_slice());
 
+        let model_view_loc = gl.get_uniform_location(*program, "model_view").unwrap();
         let view = Matrix4::identity();
         gl.uniform_matrix_4_f32_slice(Some(&model_view_loc), false, view.to_slice());
+
+        // find shader-specific uniforms
+        let mut other = HashMap::default();
+        for uni in uniforms {
+            let location = gl.get_uniform_location(*program, uni.0).unwrap();
+            other.insert(uni.0.to_string(), ShaderUniform{
+                ty: uni.1.clone(),
+                location,
+            });
+        }
         
+        ShaderUniformLocations {
+            projection: projection_loc,
+            model_view: model_view_loc,
+            other
+        }
+    }
+
+    unsafe fn configure_gl(
+        gl: &Context,
+        w: u32,
+        h: u32
+    ) {
         gl.viewport(0, 0, w as _, h as _);
         gl.enable(DEPTH_TEST);
         gl.enable(COLOR);
         gl.enable(CULL_FACE);
         gl.enable(MULTISAMPLE);
         gl.clear_color(0.0, 0.0, 0.0, 1.0);
-
-        ShaderUniformLocations {
-            projection: projection_loc,
-            model_view: model_view_loc,
-        }
    }
 }

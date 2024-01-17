@@ -1,8 +1,8 @@
-use std::{mem::size_of, slice::from_raw_parts};
+use std::{mem::size_of, slice::from_raw_parts, collections::HashMap};
 use glow::*;
 use crate::{
     math::{vector3::Vector3, Matrix4}, 
-    renderer::GlRenderer, 
+    renderer::{GlRenderer, ShaderProgram, ShaderProgramType, ShaderUniformType}, 
     camera::ObjectCamera
 };
 use super::{RGB, Object3d, Geometrical};
@@ -42,7 +42,7 @@ impl dyn Renderable {
         self.upload_indices(gl);
 
         // vao
-        self.config_vao(gl, renderer.attrib_locations);
+        self.config_vao(gl);
         
         // unbind
         gl.bind_vertex_array(None);
@@ -52,20 +52,20 @@ impl dyn Renderable {
 
     unsafe fn config_vao(
         &self,
-        gl: &Context,
-        attrib_locations: (u32, u32)
+        gl: &Context
     ) {
         let geo = self.get_geometry();
 
         let sizes = geo.get_sizes();
         let mut offset = 0;
+        let mut location = 0;
         
         if sizes.total > 0 {
             gl.bind_vertex_array(geo.vao);
 
             if sizes.positions > 0 {
                 gl.vertex_attrib_pointer_f32(
-                    attrib_locations.0, 
+                    location, 
                     3, 
                     FLOAT, 
                     false, 
@@ -73,11 +73,12 @@ impl dyn Renderable {
                     offset as _
                 );
                 offset += sizes.positions;
+                location += 1;
             }
 
             if sizes.colors > 0 {
                 gl.vertex_attrib_pointer_f32(
-                    attrib_locations.1, 
+                    location, 
                     3, 
                     FLOAT, 
                     false, 
@@ -147,8 +148,16 @@ impl dyn Renderable {
         let gl = &renderer.gl;
 
         gl.bind_vertex_array(geo.vao);
-        gl.enable_vertex_attrib_array(renderer.attrib_locations.0);
-        gl.enable_vertex_attrib_array(renderer.attrib_locations.1);
+
+        let mut location = 0;
+        if geo.positions.is_some() { 
+            gl.enable_vertex_attrib_array(location);
+            location += 1;
+        }
+        if geo.colors.is_some() { 
+            gl.enable_vertex_attrib_array(location);
+            //location += 1;
+        }
 
         gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
         gl.bind_buffer(ELEMENT_ARRAY_BUFFER, geo.ebo);
@@ -158,20 +167,32 @@ impl dyn Renderable {
         &self,
         renderer: &GlRenderer
     ) {
+        let geo = self.get_geometry();
         let gl = &renderer.gl;
         
         gl.bind_buffer(ELEMENT_ARRAY_BUFFER, None);
         gl.bind_buffer(ARRAY_BUFFER, None);
 
-        gl.disable_vertex_attrib_array(renderer.attrib_locations.1);
-        gl.disable_vertex_attrib_array(renderer.attrib_locations.0);
+        let mut location = 0;
+        if geo.positions.is_some() { 
+            gl.disable_vertex_attrib_array(location);
+            location += 1;
+        }
+        if geo.colors.is_some() { 
+            gl.disable_vertex_attrib_array(location);
+            //location += 1;
+        }
+
         gl.bind_vertex_array(None);
+
+        gl.use_program(None);
     }
 
     unsafe fn update(
         &mut self,
         world_matrix: Option<&Matrix4>,
         camera: &dyn ObjectCamera,
+        program: &ShaderProgram,
         renderer: &GlRenderer
     ) -> bool {
         self.upload(renderer);
@@ -196,13 +217,60 @@ impl dyn Renderable {
 
         let gl = &renderer.gl;
 
+        // update matrices
         gl.uniform_matrix_4_f32_slice(
-            Some(&renderer.uniform_locations.model_view), 
+            Some(&program.uniform_locations.projection), 
+            false, 
+            camera.get_data().proj_matrix.to_slice()
+        );
+
+        gl.uniform_matrix_4_f32_slice(
+            Some(&program.uniform_locations.model_view), 
             false, 
             model_view_matrix.to_slice()
         );
 
+        // update uniforms depending on the shader used
+        let mut uniform_values = HashMap::<String, Vec<f32>>::default();
+        uniform_values.insert("color".to_string(), Vector3::new(1.0, 0.0, 0.0).to_slice().to_vec());
+
+        for (name, uniform) in &program.uniform_locations.other {
+            match uniform.ty {
+                ShaderUniformType::Vector3 => {
+                    gl.uniform_3_f32_slice(
+                        Some(&uniform.location), &uniform_values[name]
+                    );
+                },
+                ShaderUniformType::Matrix4 => {
+                    gl.uniform_matrix_4_f32_slice(
+                        Some(&uniform.location), false, &uniform_values[name]
+                    );
+                },
+            }
+        }
+
         updated
+    }
+
+    fn select_shader(
+        &self,
+        renderer: &GlRenderer
+    ) -> ShaderProgram {
+        let geo = self.get_geometry();
+        let gl = &renderer.gl;
+
+        let program = if geo.positions.is_some() && geo.colors.is_some() {
+            renderer.programs[&ShaderProgramType::PosAndColor].clone()
+        }
+        else {
+            renderer.programs[&ShaderProgramType::PosOnly].clone()
+        }; 
+            
+        unsafe { 
+            gl.use_program(Some(program.program)); 
+        }
+
+        program
     }
 
     pub fn draw(
@@ -212,8 +280,12 @@ impl dyn Renderable {
         renderer: &GlRenderer
     ) {
         unsafe {
+            let program = self.select_shader(renderer);
+
             let updated = self.update(
-                world_matrix, camera, 
+                world_matrix, 
+                camera, 
+                &program,
                 renderer
             );
             self.bind(renderer);
