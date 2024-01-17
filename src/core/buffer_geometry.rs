@@ -4,7 +4,7 @@ use glow::{NativeBuffer, NativeVertexArray};
 use crate::math::Vector3;
 use super::RGB;
 
-pub struct BufferGeometrySizes {
+pub(crate) struct BufferGeometrySizes {
     pub positions: usize,
     pub colors: usize,
     pub total: usize,
@@ -15,6 +15,7 @@ pub struct BufferGeometry {
     pub(crate) indices: Option<Vec<u32>>,
     pub(crate) positions: Option<Vec<Vector3>>,
     pub(crate) colors: Option<Vec<RGB>>,
+    pub(crate) dirt: bool,
     
     pub(crate) vbo: Option<NativeBuffer>,
     pub(crate) ebo: Option<NativeBuffer>,
@@ -33,13 +34,14 @@ impl BufferGeometry {
             indices,
             positions,
             colors,
+            dirt: false,
             vbo: None,
             ebo: None,
             vao: None,
         }
     }
 
-    pub fn get_sizes(
+    pub(crate) fn get_sizes(
         &self
     ) -> BufferGeometrySizes {
         
@@ -72,6 +74,7 @@ impl Clone for BufferGeometry {
             indices: self.indices.clone(), 
             positions: self.positions.clone(), 
             colors: self.colors.clone(), 
+            dirt: false,
             vbo: None, 
             ebo: None, 
             vao: None, 

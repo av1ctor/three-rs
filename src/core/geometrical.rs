@@ -15,7 +15,9 @@ pub trait Geometrical {
         &mut self,
         positions: Vec<Vector3>
     ) {
-        self.get_geometry_mut().positions = Some(positions);
+        let geo = &mut self.get_geometry_mut();
+        geo.positions = Some(positions);
+        geo.dirt = true;
     }
 
     fn drop(

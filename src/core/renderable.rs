@@ -107,18 +107,18 @@ impl dyn Renderable {
     }
 
     unsafe fn upload_vertices(
-        &self, 
-        gl: &Context 
+        &mut self, 
+        gl: &Context
     ) {
-        let geo = self.get_geometry();
+        let geo = self.get_geometry_mut();
 
         let sizes = geo.get_sizes();
-        let mut offset = 0;
         
         if sizes.total > 0 {
             gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
             gl.buffer_data_size(ARRAY_BUFFER, sizes.total as _, STATIC_DRAW);
             
+            let mut offset = 0;
             if let Some(positions) = &geo.positions { 
                 let buffer = from_raw_parts(
                     positions.as_ptr() as *const u8,
@@ -137,6 +137,8 @@ impl dyn Renderable {
                 gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, offset as _, buffer);
                 //offset += sizes.colors;
             }
+
+            geo.dirt = false;
         }
     }
 
@@ -197,6 +199,13 @@ impl dyn Renderable {
     ) -> bool {
         self.upload(renderer);
 
+        let gl = &renderer.gl;
+        let geo = self.get_geometry();
+        
+        if geo.dirt {
+            self.upload_vertices(gl);
+        }
+
         let obj = self.get_object_mut();
 
         let mut updated = obj.dirt;
@@ -212,12 +221,10 @@ impl dyn Renderable {
             }
         }
 
+        // update matrices
         let model_view_matrix = camera.get_data()
             .world_matrix_inverse.mul(&obj.world_matrix);
 
-        let gl = &renderer.gl;
-
-        // update matrices
         gl.uniform_matrix_4_f32_slice(
             Some(&program.uniform_locations.projection), 
             false, 
