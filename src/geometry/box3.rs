@@ -13,7 +13,7 @@ enum Coords {
 }
 
 impl Box3 {
-    pub fn new(
+    pub fn new_ex(
         width: f32,
         height: f32,
         depth: f32,
@@ -87,11 +87,11 @@ impl Box3 {
         );
 
         let mut colors = vec![];
-        let mut color = 0.0;
-        let inc = 1.0 / num_vertices as f32;
+        let mut color = 0.1;
+        let inc = 0.9 / num_vertices as f32;
         for _ in 0..num_vertices {
             color += inc;
-            colors.push([0.0, 0.0, color]);
+            colors.push([color, 0.0, 0.0]);
         }
         
         Self {
@@ -102,6 +102,14 @@ impl Box3 {
                 Some(colors),
             )
         }
+    }
+
+    pub fn new(
+        width: f32,
+        height: f32,
+        depth: f32,
+    ) -> Self {
+        Self::new_ex(width, height, depth, 1, 1, 1)
     }
 
     fn build_plane(

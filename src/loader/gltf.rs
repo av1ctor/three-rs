@@ -27,7 +27,7 @@ impl Gltf {
         let mut positions = vec![];
 
         for node in scene.nodes() {
-            traverse_meshes(
+            Self::traverse_meshes(
                 &node,
                 None, 
                 &mut |mesh, world_matrix| {
@@ -61,8 +61,8 @@ impl Gltf {
         }
 
         let mut colors = vec![];
-        let mut color = 0.0;
-        let inc = 1.0 / positions.len() as f32;
+        let mut color = 0.1;
+        let inc = 0.9 / positions.len() as f32;
         for _ in 0..positions.len() {
             color += inc;
             colors.push([0.0, color, 0.0]);
@@ -79,35 +79,34 @@ impl Gltf {
             }
         ))
     }
-}
-
-fn traverse_meshes(
-    node: &gltf::Node<'_>,
-    world_matrix: Option<&Matrix4>,
-    cb: &mut dyn FnMut (&gltf::Mesh<'_>, &Matrix4) -> Result<(), String>
-) -> Result<(), String> {
-    
-    let matrix = Matrix4::from_slice2(&node.transform().matrix());
-    let world_matrix = if let Some(m) = world_matrix {
-        m.mul(&matrix)
-    }
-    else {
-        matrix
-    };
-    
-    if let Some(mesh) = node.mesh() {
-        cb(&mesh, &world_matrix)?;
-        for child in node.children() {
-            traverse_meshes(&child, Some(&world_matrix), cb)?;
+    fn traverse_meshes(
+        node: &gltf::Node<'_>,
+        world_matrix: Option<&Matrix4>,
+        cb: &mut dyn FnMut (&gltf::Mesh<'_>, &Matrix4) -> Result<(), String>
+    ) -> Result<(), String> {
+        
+        let matrix = Matrix4::from_slice2(&node.transform().matrix());
+        let world_matrix = if let Some(m) = world_matrix {
+            m.mul(&matrix)
         }
-    }
-    else {
-        for child in node.children() {
-            traverse_meshes(&child, Some(&world_matrix), cb)?;
+        else {
+            matrix
+        };
+        
+        if let Some(mesh) = node.mesh() {
+            cb(&mesh, &world_matrix)?;
+            for child in node.children() {
+                Self::traverse_meshes(&child, Some(&world_matrix), cb)?;
+            }
         }
+        else {
+            for child in node.children() {
+                Self::traverse_meshes(&child, Some(&world_matrix), cb)?;
+            }
+        }
+    
+        Ok(())
     }
-
-    Ok(())
 }
 
 impl Geometrical for Gltf {

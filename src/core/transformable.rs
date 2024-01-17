@@ -110,11 +110,35 @@ pub trait Transformable
         self
     }
 
-    fn scale(
+    fn set_position(
+        &mut self,
+        position: Vector3
+    ) -> &mut Self {
+        self.get_object_mut().set_position(position);
+        self
+    }
+    
+    fn set_scale(
         &mut self,
         s: Vector3
     ) -> &mut Self {
-        self.get_object_mut().scale(s);
+        self.get_object_mut().set_scale(s);
+        self
+    }
+
+    fn set_rotation(
+        &mut self,
+        q: Quaternion
+    ) -> &mut Self {
+        self.get_object_mut().set_rotation(q);
+        self
+    }
+
+    fn set_rotation_from_euler(
+        &mut self,
+        euler: Euler
+    ) -> &mut Self {
+        self.get_object_mut().set_rotation_from_euler(euler);
         self
     }
 

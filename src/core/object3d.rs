@@ -14,6 +14,7 @@ pub struct ObjectData {
     pub(crate) children: Vec<Rc<RefCell<dyn GeometricalRenderable>>>,
     
     pub(crate) position: Vector3,
+    
     pub(crate) rotation: Euler,
     pub(crate) quaternion: Quaternion,
     pub(crate) scale: Vector3,
@@ -272,11 +273,31 @@ impl ObjectData {
         self
     }
 
-    pub fn scale(
+    pub fn set_scale(
         &mut self,
         s: Vector3
     ) -> &mut Self {
         self.scale = s;
+        self.dirt = true;
+        self
+    }
+
+    pub fn set_rotation(
+        &mut self,
+        q: Quaternion
+    ) -> &mut Self {
+        self.quaternion = q;
+        self.on_quaternion_updated();
+        self.dirt = true;
+        self
+    }
+
+    pub fn set_rotation_from_euler(
+        &mut self,
+        euler: Euler
+    ) -> &mut Self {
+        self.rotation = euler;
+        self.quaternion = Quaternion::from_euler(&euler);
         self.dirt = true;
         self
     }
@@ -296,5 +317,17 @@ pub trait Object3d {
         child: Rc<RefCell<dyn GeometricalRenderable>>
     ) {
         self.get_object_mut().add(child);
+    }
+
+    fn show(
+        &mut self
+    ) {
+        self.get_object_mut().visible = true;
+    }
+
+    fn hide(
+        &mut self
+    ) {
+        self.get_object_mut().visible = false;
     }
 }

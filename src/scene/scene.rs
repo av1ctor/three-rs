@@ -32,6 +32,16 @@ impl Scene {
         }
     }
 
+    pub fn reset(
+        &mut self
+    ) {
+        let renderer = &self.renderer.borrow_mut();
+        for obj in &mut self.objects {
+            obj.borrow_mut().drop(renderer);
+        }
+        self.objects = vec![];
+    }
+
     pub fn add<T>(
         &mut self,
         obj: Rc<RefCell<T>>

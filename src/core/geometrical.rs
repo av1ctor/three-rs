@@ -1,5 +1,5 @@
 use glow::*;
-use crate::renderer::GlRenderer;
+use crate::{renderer::GlRenderer, math::Vector3};
 use super::BufferGeometry;
 
 pub trait Geometrical {
@@ -10,6 +10,13 @@ pub trait Geometrical {
     fn get_geometry_mut(
         &mut self
     ) -> &mut BufferGeometry;
+
+    fn set_positions(
+        &mut self,
+        positions: Vec<Vector3>
+    ) {
+        self.get_geometry_mut().positions = Some(positions);
+    }
 
     fn drop(
         &mut self, 

@@ -191,7 +191,8 @@ impl dyn Renderable {
             }
         }
 
-        let model_view_matrix = camera.get_data().world_matrix_inverse.mul(&obj.world_matrix);
+        let model_view_matrix = camera.get_data()
+            .world_matrix_inverse.mul(&obj.world_matrix);
 
         let gl = &renderer.gl;
 
