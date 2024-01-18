@@ -1,5 +1,4 @@
 use std::{rc::Rc, cell::RefCell};
-use glow::*;
 use crate::{
     core::GeometricalRenderable, 
     renderer::GlRenderer, 
@@ -57,17 +56,15 @@ impl Scene {
         
         let renderer = &self.renderer.borrow_mut();
         
-        unsafe {
-            renderer.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
+        renderer.clear();
 
-            for object in &mut self.objects {
-                let obj = &mut object.borrow_mut();
-                if obj.get_object().visible {
-                    obj.render(None, camera, renderer);
-                }
+        for object in &mut self.objects {
+            let obj = &mut object.borrow_mut();
+            if obj.get_object().visible {
+                obj.render(None, camera, renderer);
             }
-
-            renderer.window.gl_swap_window();
         }
+
+        renderer.swap_window();
     }
 }

@@ -6,9 +6,14 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+renderer = []
+
 [dependencies]
 serde = {version = "1.0.193", default-features = false, features = ["derive"]}
-glow = "0.13.0"
-sdl2 = "0.36.0"
 gltf = {version = "1.4.0", features = ["import"]}
 ulid = {version = "1.0.0", features = [], default-features = false}
+#[cfg(feature = "renderer")]
+glow = "0.13.0"
+#[cfg(feature = "renderer")]
+sdl2 = "0.36.0"

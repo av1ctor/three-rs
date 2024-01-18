@@ -1,11 +1,20 @@
+#[cfg(feature = "renderer")]
 use std::{mem::size_of, slice::from_raw_parts, collections::HashMap};
+#[cfg(feature = "renderer")]
 use glow::*;
+#[cfg(feature = "renderer")]
 use crate::{
-    math::{vector3::Vector3, Matrix4}, 
-    renderer::{GlRenderer, ShaderProgram, ShaderProgramType, ShaderUniformType}, 
+    math::vector3::Vector3,
+    renderer::{ShaderProgram, ShaderProgramType, ShaderUniformType}, 
+};
+use crate::{
+    math::Matrix4, 
+    renderer::GlRenderer, 
     camera::ObjectCamera
 };
-use super::{RGB, Object3d, Geometrical};
+#[cfg(feature = "renderer")]
+use super::RGB;
+use super::{Object3d, Geometrical};
 
 pub trait Renderable
     where Self: Object3d + Geometrical {
@@ -17,6 +26,7 @@ pub trait Renderable
     );
 }
 
+#[cfg(feature = "renderer")]
 impl dyn Renderable {
     unsafe fn upload(
         &mut self, 
@@ -370,3 +380,14 @@ impl dyn Renderable {
     }
 }
 
+#[cfg(not(feature = "renderer"))]
+impl dyn Renderable {
+    pub fn draw(
+        &mut self,
+        _world_matrix: Option<&Matrix4>,
+        _camera: &dyn ObjectCamera,
+        _renderer: &GlRenderer
+    ) {
+        todo!()
+    }
+}

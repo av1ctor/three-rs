@@ -1,9 +1,11 @@
+#[cfg(feature = "renderer")]
 use std::mem::size_of;
-
+#[cfg(feature = "renderer")]
 use glow::{NativeBuffer, NativeVertexArray};
 use crate::math::Vector3;
 use super::RGB;
 
+#[cfg(feature = "renderer")]
 pub(crate) struct BufferAttributeSizes {
     pub positions: usize,
     pub normals: usize,
@@ -19,8 +21,11 @@ pub struct BufferGeometry {
     pub(crate) colors: Option<Vec<RGB>>,
     pub(crate) dirt: bool,
     
+    #[cfg(feature = "renderer")]
     pub(crate) vbo: Option<NativeBuffer>,
+    #[cfg(feature = "renderer")]
     pub(crate) ebo: Option<NativeBuffer>,
+    #[cfg(feature = "renderer")]
     pub(crate) vao: Option<NativeVertexArray>,
 }
 
@@ -39,12 +44,16 @@ impl BufferGeometry {
             normals,
             colors,
             dirt: false,
+            #[cfg(feature = "renderer")]
             vbo: None,
+            #[cfg(feature = "renderer")]
             ebo: None,
+            #[cfg(feature = "renderer")]
             vao: None,
         }
     }
 
+    #[cfg(feature = "renderer")]
     pub(crate) fn get_attribute_sizes(
         &self
     ) -> BufferAttributeSizes {
@@ -86,8 +95,11 @@ impl Clone for BufferGeometry {
             normals: self.normals.clone(), 
             colors: self.colors.clone(), 
             dirt: false,
+            #[cfg(feature = "renderer")]
             vbo: None, 
+            #[cfg(feature = "renderer")]
             ebo: None, 
+            #[cfg(feature = "renderer")]
             vao: None, 
         }
     }

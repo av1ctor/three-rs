@@ -1,11 +1,8 @@
 use std::collections::HashMap;
 use glow::*;
 use crate::math::Matrix4;
-
-pub enum Event {
-    Quit,
-    KeyDown(usize),
-}
+use super::Event;
+use crate::core::BufferGeometry;
 
 #[derive(Clone, Debug)]
 #[repr(C)]
@@ -64,11 +61,11 @@ const SHADER_SOURCES: &[(ShaderProgramType, &str, &str, &[(&str, ShaderUniformTy
 ];
 
 pub struct GlRenderer {
-    pub(crate) gl: Context,
-    pub(crate) window: sdl2::video::Window,
-    pub(crate) events_loop: sdl2::EventPump,
-    pub(crate) _context: sdl2::video::GLContext,
-    pub(crate) programs: HashMap<ShaderProgramType, ShaderProgram>,
+    gl: Context,
+    window: sdl2::video::Window,
+    events_loop: sdl2::EventPump,
+    _context: sdl2::video::GLContext,
+    programs: HashMap<ShaderProgramType, ShaderProgram>,
 }
 
 impl Drop for GlRenderer {
@@ -158,6 +155,35 @@ impl GlRenderer {
         }
         
         events
+    }
+
+    pub fn swap_window(
+        &self
+    ) {
+        self.window.gl_swap_window();
+    }
+
+    pub fn clear(
+        &self
+    ) {
+        self.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT)
+    }
+
+    pub fn delete_buffers(
+        &self,
+        geo: &BufferGeometry
+    ) {
+        let gl = &self.gl;
+
+        if let Some(vao) = geo.vao {
+            gl.delete_vertex_array(vao);
+        }
+        if let Some(ebo) = geo.ebo {
+            gl.delete_buffer(ebo);
+        }
+        if let Some(vbo) = geo.vbo {
+            gl.delete_buffer(vbo);
+        }
     }
 
     unsafe fn create_program(
