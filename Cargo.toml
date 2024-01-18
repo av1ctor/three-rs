@@ -8,9 +8,11 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 renderer = []
+gltf-loader = []
 
 [dependencies]
 serde = {version = "1.0.193", default-features = false, features = ["derive"]}
+#[cfg(feature = "gltf-loader")]
 gltf = {version = "1.4.0", features = ["import"]}
 #[cfg(feature = "renderer")]
 glow = "0.13.0"
