@@ -36,14 +36,9 @@ impl dyn Renderable {
             return;
         }
         
-        let gl = &renderer.gl;
+        renderer.create_buffers(self.get_geometry_mut());
 
-        {
-            let geo = self.get_geometry_mut();
-            geo.vbo = Some(gl.create_buffer().unwrap());
-            geo.ebo = Some(gl.create_buffer().unwrap());
-            geo.vao = Some(gl.create_vertex_array().unwrap());
-        }
+        let gl = &renderer.gl;
         
         // vbos
         self.upload_vertices(gl);

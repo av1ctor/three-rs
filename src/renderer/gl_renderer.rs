@@ -61,11 +61,11 @@ const SHADER_SOURCES: &[(ShaderProgramType, &str, &str, &[(&str, ShaderUniformTy
 ];
 
 pub struct GlRenderer {
-    gl: Context,
+    pub(crate) gl: Context,
     window: sdl2::video::Window,
     events_loop: sdl2::EventPump,
     _context: sdl2::video::GLContext,
-    programs: HashMap<ShaderProgramType, ShaderProgram>,
+    pub(crate) programs: HashMap<ShaderProgramType, ShaderProgram>,
 }
 
 impl Drop for GlRenderer {
@@ -166,7 +166,22 @@ impl GlRenderer {
     pub fn clear(
         &self
     ) {
-        self.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT)
+        unsafe {
+            self.gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT)
+        }
+    }
+
+    pub fn create_buffers(
+        &self,
+        geo: &mut BufferGeometry
+    ) {
+        let gl = &self.gl;
+
+        unsafe {
+            geo.vbo = Some(gl.create_buffer().unwrap());
+            geo.ebo = Some(gl.create_buffer().unwrap());
+            geo.vao = Some(gl.create_vertex_array().unwrap());
+        }
     }
 
     pub fn delete_buffers(
@@ -175,14 +190,16 @@ impl GlRenderer {
     ) {
         let gl = &self.gl;
 
-        if let Some(vao) = geo.vao {
-            gl.delete_vertex_array(vao);
-        }
-        if let Some(ebo) = geo.ebo {
-            gl.delete_buffer(ebo);
-        }
-        if let Some(vbo) = geo.vbo {
-            gl.delete_buffer(vbo);
+        unsafe {
+            if let Some(vao) = geo.vao {
+                gl.delete_vertex_array(vao);
+            }
+            if let Some(ebo) = geo.ebo {
+                gl.delete_buffer(ebo);
+            }
+            if let Some(vbo) = geo.vbo {
+                gl.delete_buffer(vbo);
+            }
         }
     }
 
