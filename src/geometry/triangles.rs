@@ -29,6 +29,7 @@ impl Triangles {
                 TRIANGLES, 
                 None, 
                 Some(positions), 
+                None,
                 Some(colors),
             )
         }

@@ -21,6 +21,7 @@ impl LineStrip {
                 None, 
                 Some(lines), 
                 None,
+                None,
             )
         }
     }

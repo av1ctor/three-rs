@@ -56,7 +56,7 @@ impl dyn Renderable {
     ) {
         let geo = self.get_geometry();
 
-        let sizes = geo.get_sizes();
+        let sizes = geo.get_attribute_sizes();
         let mut offset = 0;
         let mut location = 0;
         
@@ -73,6 +73,19 @@ impl dyn Renderable {
                     offset as _
                 );
                 offset += sizes.positions;
+                location += 1;
+            }
+
+            if sizes.normals > 0 {
+                gl.vertex_attrib_pointer_f32(
+                    location, 
+                    3, 
+                    FLOAT, 
+                    false, 
+                    size_of::<Vector3>() as _, 
+                    offset as _
+                );
+                offset += sizes.normals;
                 location += 1;
             }
 
@@ -112,7 +125,7 @@ impl dyn Renderable {
     ) {
         let geo = self.get_geometry_mut();
 
-        let sizes = geo.get_sizes();
+        let sizes = geo.get_attribute_sizes();
         
         if sizes.total > 0 {
             gl.bind_buffer(ARRAY_BUFFER, geo.vbo);
@@ -126,6 +139,15 @@ impl dyn Renderable {
                 );
                 gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, offset as _, buffer);
                 offset += sizes.positions;
+            }
+
+            if let Some(normals) = &geo.normals { 
+                let buffer = from_raw_parts(
+                    normals.as_ptr() as *const u8,
+                    sizes.normals
+                );
+                gl.buffer_sub_data_u8_slice(ARRAY_BUFFER, offset as _, buffer);
+                offset += sizes.normals;
             }
 
             if let Some(colors) = &geo.colors { 
@@ -156,6 +178,10 @@ impl dyn Renderable {
             gl.enable_vertex_attrib_array(location);
             location += 1;
         }
+        if geo.normals.is_some() { 
+            gl.enable_vertex_attrib_array(location);
+            location += 1;
+        }
         if geo.colors.is_some() { 
             gl.enable_vertex_attrib_array(location);
             //location += 1;
@@ -177,6 +203,10 @@ impl dyn Renderable {
 
         let mut location = 0;
         if geo.positions.is_some() { 
+            gl.disable_vertex_attrib_array(location);
+            location += 1;
+        }
+        if geo.normals.is_some() { 
             gl.disable_vertex_attrib_array(location);
             location += 1;
         }
@@ -266,7 +296,10 @@ impl dyn Renderable {
         let geo = self.get_geometry();
         let gl = &renderer.gl;
 
-        let program = if geo.positions.is_some() && geo.colors.is_some() {
+        let program = if geo.positions.is_some() && geo.normals.is_some() {
+            renderer.programs[&ShaderProgramType::PosAndNormal].clone()
+        }
+        else if geo.positions.is_some() && geo.colors.is_some() {
             renderer.programs[&ShaderProgramType::PosAndColor].clone()
         }
         else {

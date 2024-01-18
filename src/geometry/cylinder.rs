@@ -84,6 +84,7 @@ impl Cylinder {
                 TRIANGLES, 
                 Some(indices), 
                 Some(positions), 
+                None,
                 Some(colors),
             )
         }

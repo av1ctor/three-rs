@@ -25,6 +25,7 @@ impl Gltf {
         
         let scene = doc.default_scene().unwrap();
         let mut positions = vec![];
+        let mut normals = vec![];
 
         for node in scene.nodes() {
             Self::traverse_meshes(
@@ -53,19 +54,30 @@ impl Gltf {
                                 },
                             }
                         }
+
+                        if let Some(iter) = reader.read_normals() {
+                            let prim_norm = iter.collect::<Vec<_>>();
+                            let prim_ind: Vec<u32> = reader.read_indices()
+                                .map(|ind| ind.into_u32().collect())
+                                .unwrap_or((0..prim_norm.len() as u32).collect());
+
+                            match primitive.mode() {
+                                gltf::mesh::Mode::Triangles => {
+                                    for i in 0..prim_ind.len() {
+                                        let v = Vector3::from_slice(&prim_norm[prim_ind[i] as usize]);
+                                        normals.push(v);
+                                    }
+                                }
+                                _ => {
+                                    return Err("Unsupported primitive".to_string());
+                                },
+                            }
+                        }
                     }
 
                     Ok(())
                 }
             )?;
-        }
-
-        let mut colors = vec![];
-        let mut color = 0.1;
-        let inc = 0.9 / positions.len() as f32;
-        for _ in 0..positions.len() {
-            color += inc;
-            colors.push([0.0, color, 0.0]);
         }
 
         Ok(Mesh::new(
@@ -74,7 +86,8 @@ impl Gltf {
                     TRIANGLES, 
                     None, 
                     Some(positions), 
-                    Some(colors)
+                    Some(normals),
+                    None
                 )
             }
         ))

@@ -99,6 +99,7 @@ impl Box3 {
                 TRIANGLES, 
                 Some(indices), 
                 Some(positions), 
+                None,
                 Some(colors),
             )
         }

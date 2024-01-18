@@ -32,6 +32,7 @@ pub(crate) struct ShaderUniformLocations {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum ShaderProgramType {
     PosOnly = 0,
+    PosAndNormal,
     PosAndColor,
 }
 
@@ -47,6 +48,12 @@ const SHADER_SOURCES: &[(ShaderProgramType, &str, &str, &[(&str, ShaderUniformTy
         include_str!("../shaders/pos/vertex.glsl"), 
         include_str!("../shaders/pos/frag.glsl"),
         &[("color", ShaderUniformType::Vector3)],
+    ),
+    (
+        ShaderProgramType::PosAndNormal,
+        include_str!("../shaders/pos_normal/vertex.glsl"), 
+        include_str!("../shaders/pos_normal/frag.glsl"),
+        &[],
     ),
     (
         ShaderProgramType::PosAndColor,
