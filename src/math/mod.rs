@@ -10,6 +10,7 @@ pub mod matrix4;
 pub mod path3;
 pub mod euler;
 pub mod quaternion;
+#[cfg(feature = "gltf-loader")]
 pub mod octree;
 pub mod misc;
 
@@ -25,4 +26,5 @@ pub use matrix4::*;
 pub use path3::*;
 pub use euler::*;
 pub use quaternion::*;
+#[cfg(feature = "gltf-loader")]
 pub use octree::*;

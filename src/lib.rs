@@ -6,9 +6,10 @@
 
 pub mod math;
 pub mod core;
-pub mod geometry;
 pub mod object;
 pub mod scene;
 pub mod camera;
 pub mod renderer;
 pub mod loader;
+#[cfg(feature = "renderer")]
+pub mod geometry;
