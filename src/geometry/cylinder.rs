@@ -1,7 +1,6 @@
 use std::f32::consts::PI;
-use glow::TRIANGLES;
 use crate::{
-    core::{BufferGeometry, Geometrical}, 
+    core::{BufferGeometry, Geometrical, BufferGeometryMode}, 
     math::Vector3
 };
 
@@ -81,7 +80,7 @@ impl Cylinder {
         
         Self {
             geo: BufferGeometry::new(
-                TRIANGLES, 
+                BufferGeometryMode::Triangles, 
                 Some(indices), 
                 Some(positions), 
                 None,

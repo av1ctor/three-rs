@@ -1,6 +1,5 @@
-use glow::TRIANGLES;
 use crate::{
-    core::{BufferGeometry, Geometrical, RGB}, 
+    core::{BufferGeometry, Geometrical, RGB, BufferGeometryMode}, 
     math::Triangle
 };
 
@@ -26,7 +25,7 @@ impl Triangles {
         
         Self {
             geo: BufferGeometry::new(
-                TRIANGLES, 
+                BufferGeometryMode::Triangles, 
                 None, 
                 Some(positions), 
                 None,

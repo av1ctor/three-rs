@@ -11,5 +11,4 @@ pub mod scene;
 pub mod camera;
 pub mod renderer;
 pub mod loader;
-#[cfg(feature = "renderer")]
 pub mod geometry;

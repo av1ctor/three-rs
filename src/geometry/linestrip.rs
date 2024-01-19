@@ -1,6 +1,5 @@
-use glow::LINE_STRIP;
 use crate::{
-    core::{BufferGeometry, Geometrical, RGB}, 
+    core::{BufferGeometry, Geometrical, RGB, BufferGeometryMode}, 
     math::Vector3
 };
 
@@ -17,7 +16,7 @@ impl LineStrip {
         
         Self {
             geo: BufferGeometry::new(
-                LINE_STRIP, 
+                BufferGeometryMode::LineStrip, 
                 None, 
                 Some(lines), 
                 None,

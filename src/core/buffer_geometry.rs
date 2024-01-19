@@ -5,7 +5,16 @@ use glow::{NativeBuffer, NativeVertexArray};
 use crate::math::Vector3;
 use super::RGB;
 
+#[repr(C)]
+#[derive(Clone)]
+pub enum BufferGeometryMode {
+    Lines = 0x0001,
+    LineStrip = 0x0003,
+    Triangles = 0x0004,
+}
+
 #[cfg(feature = "renderer")]
+#[derive(Clone)]
 pub(crate) struct BufferAttributeSizes {
     pub positions: usize,
     pub normals: usize,
@@ -14,7 +23,7 @@ pub(crate) struct BufferAttributeSizes {
 }
 
 pub struct BufferGeometry {
-    pub(crate) mode: u32,
+    pub(crate) mode: BufferGeometryMode,
     pub(crate) indices: Option<Vec<u32>>,
     pub(crate) positions: Option<Vec<Vector3>>,
     pub(crate) normals: Option<Vec<Vector3>>,
@@ -31,7 +40,7 @@ pub struct BufferGeometry {
 
 impl BufferGeometry {
     pub fn new(
-        mode: u32,
+        mode: BufferGeometryMode,
         indices: Option<Vec<u32>>,
         positions: Option<Vec<Vector3>>,
         normals: Option<Vec<Vector3>>,
@@ -89,7 +98,7 @@ impl Clone for BufferGeometry {
         &self
     ) -> Self {
         Self { 
-            mode: self.mode, 
+            mode: self.mode.clone(), 
             indices: self.indices.clone(), 
             positions: self.positions.clone(), 
             normals: self.normals.clone(), 

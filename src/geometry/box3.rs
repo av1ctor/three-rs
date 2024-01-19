@@ -1,5 +1,7 @@
-use glow::TRIANGLES;
-use crate::{core::{BufferGeometry, Geometrical}, math::Vector3};
+use crate::{
+    core::{BufferGeometry, Geometrical, BufferGeometryMode}, 
+    math::Vector3
+};
 
 #[derive(Clone)]
 pub struct Box3 {
@@ -96,7 +98,7 @@ impl Box3 {
         
         Self {
             geo: BufferGeometry::new(
-                TRIANGLES, 
+                BufferGeometryMode::Triangles, 
                 Some(indices), 
                 Some(positions), 
                 None,

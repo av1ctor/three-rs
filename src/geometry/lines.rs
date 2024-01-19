@@ -1,6 +1,5 @@
-use glow::LINES;
 use crate::{
-    core::{BufferGeometry, Geometrical, RGB}, 
+    core::{BufferGeometry, Geometrical, RGB, BufferGeometryMode}, 
     math::Vector3
 };
 
@@ -17,7 +16,7 @@ impl Lines {
         
         Self {
             geo: BufferGeometry::new(
-                LINES, 
+                BufferGeometryMode::Lines, 
                 None, 
                 Some(lines), 
                 None,
