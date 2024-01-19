@@ -6,7 +6,7 @@ use crate::math::Vector3;
 use super::RGB;
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum BufferGeometryMode {
     Lines = 0x0001,
     LineStrip = 0x0003,

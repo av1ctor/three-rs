@@ -1,8 +1,9 @@
 use std::{rc::Rc, cell::RefCell};
-use glow::TRIANGLES;
 use crate::{
     math::{matrix4::Matrix4, vector3::Vector3},
-    core::{BufferGeometry, Geometrical}, object::Mesh
+    core::{BufferGeometry, BufferGeometryMode, Geometrical}, 
+    object::Mesh, 
+    renderer::GlRenderer
 };
 
 pub struct Gltf {
@@ -83,7 +84,7 @@ impl Gltf {
         Ok(Mesh::new(
             &Self{
                 geo: BufferGeometry::new(
-                    TRIANGLES, 
+                    BufferGeometryMode::Triangles, 
                     None, 
                     Some(positions), 
                     Some(normals),
@@ -137,7 +138,7 @@ impl Geometrical for Gltf {
 
     fn drop(
         &mut self, 
-        renderer: &crate::renderer::GlRenderer
+        renderer: &GlRenderer
     ) {
         (self as &mut dyn Geometrical).destroy(renderer)
     }
