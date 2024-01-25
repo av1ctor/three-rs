@@ -1,10 +1,6 @@
 use std::{rc::Rc, cell::RefCell};
 use crate::math::{
-    {Vector3, RIGHT, UP, FORWARD}, 
-    Euler, 
-    Quaternion, 
-    Matrix4, 
-    Matrix3
+    Euler, Matrix3, Matrix4, Quaternion, {Vector3, RIGHT, UP, FORWARD}
 };
 use super::GeometricalRenderable;
 

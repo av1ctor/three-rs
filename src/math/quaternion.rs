@@ -154,10 +154,47 @@ impl Quaternion {
         }
     }
 
+    pub fn from_angular_velocity(
+        v: &Vector3
+    ) -> Self {
+        let len = v.length();
+        if len <= 0.0 {
+            Self::identity()
+        }
+        else {
+            let s = (len * 0.5).sin() / len;
+
+            Self {
+                x: v.x * s,
+                y: v.y * s,
+                z: v.z * s,
+                w: (len * 0.5).cos(),
+            }
+        }
+    }
+
     pub fn to_slice(
         &self
     ) -> [f32; 4] {
         [self.x, self.y, self.z, self.w]
+    }
+
+    pub fn to_angular_velocity(
+        &self
+    ) -> Vector3 {
+        if self.w.abs() > 1023.5 / 1024.0 {
+            Vector3::zero()
+        }
+        else {
+            let angle = self.w.abs().acos();
+            let s = self.w.signum() * 2.0 * angle / angle.sin();
+
+            Vector3::new(
+                self.x * s,
+                self.y * s,
+                self.z * s
+            )
+        }
     }
 
     pub fn identity(
@@ -304,6 +341,20 @@ impl Quaternion {
         f32::atan2(
             2.0 * (self.x * self.y + self.w * self.z), 
             self.w * self.w + self.x * self.x - self.y * self.y - self.z * self.z
+        )
+    }
+
+    pub fn average(
+        arr: &Vec<Self>
+    ) -> Self {
+        // from: https://stackoverflow.com/a/52575403
+        let mut acc = Vector3::zero();
+        for q in arr {
+            acc.add_mut(&q.to_angular_velocity());
+        }
+
+        Self::from_angular_velocity(
+            &acc.mul_scalar(1.0 / arr.len() as f32)
         )
     }
 }
