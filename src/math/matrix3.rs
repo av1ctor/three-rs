@@ -13,9 +13,9 @@ impl Default for Matrix3 {
 
 impl Matrix3 {
     pub fn new(
-        src: &[f32; 3*3]
+        src: [f32; 3*3]
     ) -> Self {
-        Self(src.clone())
+        Self(src)
     }
 
     pub fn from_matrix4(

@@ -123,7 +123,7 @@ impl ObjectData {
         &mut self,
         euler: &Euler
     ) -> &mut Self {
-        self.quaternion = Quaternion::from_vector(&euler.v, euler.order);
+        self.quaternion = Quaternion::from_euler(&euler);
         self.on_quaternion_updated();
         self.dirt = true;
         self

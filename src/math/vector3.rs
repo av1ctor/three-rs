@@ -342,59 +342,6 @@ impl Vector3 {
         }
     }
 
-    pub fn rotate_x(
-        &self,
-        angle: f32
-    ) -> Self {
-        let c = angle.cos();
-        let s = angle.sin();
-        
-        Self {
-            x: self.x,
-            y: self.y * c - self.z * s,
-            z: self.y * s + self.z * c,
-        }
-    }
-
-    pub fn rotate_y(
-        &self,
-        angle: f32
-    ) -> Self {
-        let c = angle.cos();
-        let s = angle.sin();
-        
-        Self {
-            x: self.x * c + self.z * s,
-            y: self.y,
-            z: -self.x * s + self.z * c,
-        }
-    }
-
-    pub fn rotate_z(
-        &self,
-        angle: f32
-    ) -> Self {
-        let c = angle.cos();
-        let s = angle.sin();
-
-        Self {
-            x: self.x * c - self.y * s,
-            y: self.x * s + self.y * c,
-            z: self.z,
-        }
-    }
-
-    pub fn angle_zx(
-        &self
-    ) -> f32 {
-        let a = self.z.atan2(self.x);
-        if a < 0.0 { 
-            a + 2.0 * PI
-        } else { 
-            a 
-        }
-    }
-
     pub fn angle_xz(
         &self
     ) -> f32 {
@@ -405,5 +352,4 @@ impl Vector3 {
             a 
         }
     }
-
 }

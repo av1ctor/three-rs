@@ -58,11 +58,12 @@ impl Quaternion {
         }
     }
 
-    pub fn from_vector(
-        vector: &Vector3,
-        order: EulerOrder
+    pub fn from_euler(
+        euler: &Euler
     ) -> Self {
-		let c1 = (vector.x / 2.0).cos();
+		let vector = &euler.v;
+
+        let c1 = (vector.x / 2.0).cos();
 		let c2 = (vector.y / 2.0).cos();
 		let c3 = (vector.z / 2.0).cos();
 
@@ -70,7 +71,7 @@ impl Quaternion {
 		let s2 = (vector.y / 2.0).sin();
 		let s3 = (vector.z / 2.0).sin();
 
-		match order {
+		match euler.order {
 			EulerOrder::XYZ => {
 				Self {
                     x: s1 * c2 * c3 + c1 * s2 * s3,
@@ -80,12 +81,6 @@ impl Quaternion {
                 }
             }
         }
-    }
-
-    pub fn from_euler(
-        euler: &Euler
-    ) -> Self {
-        Self::from_vector(&euler.v, euler.order)
     }
 
     pub fn from_matrix(
@@ -154,47 +149,61 @@ impl Quaternion {
         }
     }
 
-    pub fn from_angular_velocity(
-        v: &Vector3
+    pub fn from_unit_vector(
+        from: &Vector3,
+        to: &Vector3
     ) -> Self {
-        let len = v.length();
-        if len <= 0.0 {
-            Self::identity()
-        }
-        else {
-            let s = (len * 0.5).sin() / len;
+		let r = from.dot(to) + 1.0;
 
+		if r < f32::EPSILON {
+			if from.x.abs() > from.z.abs() {
+				Self {
+                    x: -from.y,
+				    y: from.x,
+				    z: 0.0,
+				    w: 0.0
+                }
+			} 
+            else {
+				Self {
+                    x: 0.0,
+				    y: -from.z,
+				    z: from.y,
+				    w: 0.0
+                }
+			}
+		} 
+        else {
+        	let c = from.cross(&to);
             Self {
-                x: v.x * s,
-                y: v.y * s,
-                z: v.z * s,
-                w: (len * 0.5).cos(),
+                x: c.x,
+                y: c.y,
+                z: c.y,
+                w: r
             }
-        }
+		}.normalize()
+	}
+
+    pub fn from_look_rotation(
+        forward: &Vector3,
+        up: &Vector3
+    ) -> Self {
+        let forward = forward.normalize();
+        let right = up.cross(&forward).normalize();
+        let up = forward.cross(&right);
+        let m = Matrix3::new([
+            right.x, right.y, right.z,
+            up.x, up.y, up.z,
+            forward.x, forward.y, forward.z
+        ]);
+
+        Self::from_matrix(&m)
     }
 
     pub fn to_slice(
         &self
     ) -> [f32; 4] {
         [self.x, self.y, self.z, self.w]
-    }
-
-    pub fn to_angular_velocity(
-        &self
-    ) -> Vector3 {
-        if self.w.abs() > 1023.5 / 1024.0 {
-            Vector3::zero()
-        }
-        else {
-            let angle = self.w.abs().acos();
-            let s = self.w.signum() * 2.0 * angle / angle.sin();
-
-            Vector3::new(
-                self.x * s,
-                self.y * s,
-                self.z * s
-            )
-        }
     }
 
     pub fn identity(
@@ -320,41 +329,37 @@ impl Quaternion {
         2.0 * self.w.acos()
     }
 
-    pub fn yaw(
-        &self
-    ) -> f32 {
-        f32::atan2(
-            2.0 * (self.y * self.z + self.w * self.x), 
-            self.w * self.w - self.x * self.x - self.y * self.y + self.z * self.z
-        )
-    }
-
-    pub fn pitch(
-        &self
-    ) -> f32 {
-        f32::asin(-2.0 * (self.x * self.z - self.w * self.y))
-    }
-
-    pub fn roll(
-        &self
-    ) -> f32 {
-        f32::atan2(
-            2.0 * (self.x * self.y + self.w * self.z), 
-            self.w * self.w + self.x * self.x - self.y * self.y - self.z * self.z
-        )
-    }
-
     pub fn average(
-        arr: &Vec<Self>
+        quaternions: &Vec<Self>
     ) -> Self {
-        // from: https://stackoverflow.com/a/52575403
-        let mut acc = Vector3::zero();
-        for q in arr {
-            acc.add_mut(&q.to_angular_velocity());
+        let mut forward_acc = Vector3::zero();
+        let mut up_acc = Vector3::zero();
+        
+        for q in quaternions {
+            forward_acc.add_mut(&FORWARD.apply_quaternion(q));
+            up_acc.add_mut(&UP.apply_quaternion(q));
         }
 
-        Self::from_angular_velocity(
-            &acc.mul_scalar(1.0 / arr.len() as f32)
-        )
+        forward_acc = forward_acc.div_scalar(quaternions.len() as f32);
+        up_acc = up_acc.div_scalar(quaternions.len() as f32);
+
+        Self::from_look_rotation(&forward_acc, &up_acc)
+    }
+
+    pub fn average_weighted(
+        quaternions_weights: &Vec<(Self, f32)>
+    ) -> Self {
+        let mut forward_acc = Vector3::zero();
+        let mut up_acc = Vector3::zero();
+        
+        for qw in quaternions_weights {
+            forward_acc.add_mut(&FORWARD.apply_quaternion(&qw.0).mul_scalar(qw.1));
+            up_acc.add_mut(&UP.apply_quaternion(&qw.0).mul_scalar(qw.1));
+        }
+
+        forward_acc = forward_acc.div_scalar(quaternions_weights.len() as f32);
+        up_acc = up_acc.div_scalar(quaternions_weights.len() as f32);
+
+        Self::from_look_rotation(&forward_acc, &up_acc)
     }
 }
