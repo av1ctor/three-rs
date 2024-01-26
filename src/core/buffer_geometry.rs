@@ -38,6 +38,27 @@ pub struct BufferGeometry {
     pub(crate) vao: Option<NativeVertexArray>,
 }
 
+impl Clone for BufferGeometry {
+    fn clone(
+        &self
+    ) -> Self {
+        Self { 
+            mode: self.mode.clone(), 
+            indices: self.indices.clone(), 
+            positions: self.positions.clone(), 
+            normals: self.normals.clone(), 
+            colors: self.colors.clone(), 
+            dirt: false,
+            #[cfg(feature = "renderer")]
+            vbo: None, 
+            #[cfg(feature = "renderer")]
+            ebo: None, 
+            #[cfg(feature = "renderer")]
+            vao: None, 
+        }
+    }
+}
+
 impl BufferGeometry {
     pub fn new(
         mode: BufferGeometryMode,
@@ -90,27 +111,6 @@ impl BufferGeometry {
         }
 
         sizes
-    }
-}
-
-impl Clone for BufferGeometry {
-    fn clone(
-        &self
-    ) -> Self {
-        Self { 
-            mode: self.mode.clone(), 
-            indices: self.indices.clone(), 
-            positions: self.positions.clone(), 
-            normals: self.normals.clone(), 
-            colors: self.colors.clone(), 
-            dirt: false,
-            #[cfg(feature = "renderer")]
-            vbo: None, 
-            #[cfg(feature = "renderer")]
-            ebo: None, 
-            #[cfg(feature = "renderer")]
-            vao: None, 
-        }
     }
 }
 

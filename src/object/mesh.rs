@@ -15,6 +15,7 @@ use crate::{
     camera::ObjectCamera
 };
 
+#[derive(Clone)]
 pub struct Mesh {
     obj: ObjectData,
     geo: BufferGeometry,
