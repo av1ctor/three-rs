@@ -64,6 +64,7 @@ pub struct GlRenderer {
     pub(crate) gl: Context,
     window: sdl2::video::Window,
     events_loop: sdl2::EventPump,
+    timer: sdl2::TimerSubsystem,
     _context: sdl2::video::GLContext,
     pub(crate) programs: HashMap<ShaderProgramType, ShaderProgram>,
 }
@@ -109,6 +110,7 @@ impl GlRenderer {
             Context::from_loader_function(|s| video.gl_get_proc_address(s) as *const _);
         
         let events_loop = sdl.event_pump().unwrap();
+        let timer = sdl.timer().unwrap();
 
         Self::configure_gl(&gl, w, h);
 
@@ -132,6 +134,7 @@ impl GlRenderer {
             gl,
             window,
             events_loop,
+            timer,
             _context,
             programs
         }
@@ -155,6 +158,19 @@ impl GlRenderer {
         }
         
         events
+    }
+
+    pub fn ticks(
+        &mut self
+    ) -> u32 {
+        self.timer.ticks()
+    }
+
+    pub fn delay(
+        &mut self,
+        ms: u32
+    ) {
+        self.timer.delay(ms);
     }
 
     pub fn swap_window(

@@ -19,6 +19,18 @@ impl GlRenderer {
         vec![]
     }
 
+    pub fn ticks(
+        &mut self
+    ) -> u32 {
+        0
+    }
+
+    pub fn delay(
+        &mut self,
+        _ms: u32
+    ) {
+    }
+
     pub fn swap_window(
         &self
     ) {
