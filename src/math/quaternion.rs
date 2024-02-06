@@ -329,6 +329,102 @@ impl Quaternion {
         2.0 * self.w.acos()
     }
 
+    pub fn angle_to(
+        &self,
+        q: &Self
+    ) -> f32 {
+		2.0 * self.dot(q).clamp(-1.0, 1.0).abs().acos()
+	}
+
+	pub fn rotate_towards(
+        &self,
+        q: &Self, 
+        step: f32 
+    ) -> Self {
+		let angle = self.angle_to(q);
+
+		if angle == 0.0 {
+            self.clone()
+        }
+        else {
+            let t = f32::min(1.0, step / angle);
+            self.slerp(q, t)
+        }
+	}
+
+    pub fn slerp(
+        &self,
+        other: &Self,
+        t: f32
+    ) -> Self {
+        if t == 0.0 {
+            self.clone()
+        }
+        else if t == 1.0 {
+            other.clone()
+        }
+        else {
+            let x = self.x;
+            let y = self.y; 
+            let z = self.z; 
+            let w = self.w;
+
+            let mut cos_half_theta = 
+                w * other.w + 
+                x * other.x + 
+                y * other.y + 
+                z * other.z;
+                
+            let q = if cos_half_theta < 0.0 {
+                cos_half_theta = -cos_half_theta;
+
+                Self{
+                    w: -other.w,
+                    x: -other.x,
+                    y: -other.y,
+                    z: -other.z,
+                }
+            } 
+            else {
+                other.clone()
+            };
+
+            if cos_half_theta >= 1.0 {
+                return Self {
+                    w,
+                    x,
+                    y,
+                    z,
+                };
+            }
+
+            let sqr_sin_half_theta = 
+                1.0 - cos_half_theta * cos_half_theta;
+            if sqr_sin_half_theta <= f32::EPSILON {
+                let s = 1.0 - t;
+                
+                return Self {
+                    w: s * w + t * q.w,
+                    x: s * x + t * q.x,
+                    y: s * y + t * q.y,
+                    z: s * z + t * q.z,
+                }.normalize();
+            }
+
+            let sin_half_theta = sqr_sin_half_theta.sqrt();
+            let half_theta = f32::atan2(sin_half_theta, cos_half_theta);
+            let ratio_a = ((1.0 - t) * half_theta).sin() / sin_half_theta;
+            let ratio_b = (t * half_theta).sin() / sin_half_theta;
+
+            Self {
+                w: w * ratio_a + q.w * ratio_b,
+                x: x * ratio_a + q.x * ratio_b,
+                y: y * ratio_a + q.y * ratio_b,
+                z: z * ratio_a + q.z * ratio_b,
+            }
+        }
+    }
+
     pub fn average(
         quaternions: &Vec<Self>
     ) -> Self {
