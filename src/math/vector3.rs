@@ -296,6 +296,18 @@ impl Vector3 {
 		dx * dx + dy * dy + dz * dz
 	}
 
+    pub fn clamp(
+        &self,
+        min: &Self,
+        max: &Self
+    ) -> Self {
+        Self {
+            x: f32::max(min.x, f32::min(max.x, self.x)),
+		    y: f32::max(min.y, f32::min(max.y, self.y)),
+		    z: f32::max(min.z, f32::min(max.z, self.z)),
+        }
+    }
+
     pub fn lerp(
         &self,
         v: &Vector3,

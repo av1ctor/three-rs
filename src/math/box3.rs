@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use super::{Vector3, Triangle};
+use super::{Vector3, Triangle, Sphere};
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Box3 {
@@ -129,4 +129,43 @@ impl Box3 {
     
         true
     }
+
+    pub fn clamp_point(
+        &self,
+        point: &Vector3, 
+    ) -> Vector3 {
+		point.clamp(&self.min, &self.max)
+	}
+
+	pub fn distance_to_point(
+        &self,
+        point: &Vector3
+    ) -> f32 {
+		self.clamp_point(point).distance_to(point)
+	}
+
+    pub fn get_size(
+        &self
+    ) -> Vector3 {
+		if self.is_empty() {
+            Vector3::zero()
+        } 
+        else {
+            self.max.sub(&self.min)
+        }
+	}
+
+    pub fn get_bounding_sphere(
+        &self
+    ) -> Sphere {
+		if self.is_empty() {
+			Sphere::empty()
+		} 
+        else {
+			Sphere::new(
+                self.get_center(), 
+                self.get_size().length() * 0.5
+            )
+		}
+	}
 }
